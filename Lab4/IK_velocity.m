@@ -26,5 +26,5 @@ d5 = 68;                        % Distance between joint 3 and joint 5
 lg = 0;                         % Distance between joint 5 and end effector (gripper length)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 v=[v,omega];
-dq=IKvelocity(v,q,joint);
+dq=IKvelocity(v,q,joint,0);
 end

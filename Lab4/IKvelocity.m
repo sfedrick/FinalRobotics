@@ -3,7 +3,7 @@
 % qconfig - vector of angular joint positions
 % joint - joint of interest in robot arm
 
-function [qDesired] = IKvelocity(v,qconfig,joint)
+function [qDesired] = IKvelocity(v,qconfig,joint,printerrors)
 
 J=CreateJac(qconfig,joint);
 a=0;
@@ -32,10 +32,12 @@ end
 % has lose rank and is therefore an infeasible configuration
 Rj=rank(J);
 Rv=rank([J,v]);
-if(Rj==Rv)
-    disp("this is feasible");
-else
-    disp("this is infeasible the given dq is a least squared approximation");
+if(printerrors)
+    if(Rj==Rv)
+        disp("this is feasible");
+    else
+        disp("this is infeasible the given dq is a least squared approximation");
+    end
 end
 
 end

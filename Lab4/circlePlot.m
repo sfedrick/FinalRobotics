@@ -5,13 +5,13 @@ t = linspace(0,2*pi,50);
 dt = t(2) - t(1);
 
 % initialize radius
-r = 50;
+r = 20;
 
 % initialize velocity values at each time step for circle
 v = zeros(6,length(t));
 for i=1:length(t)
-    v(2,i) = r*sin(t(i));
-    v(3,i) = r*cos(t(i));
+    v(1,i) = r*sin(t(i));
+    v(2,i) = r*cos(t(i));
 end
 
 % Toggle these on and off to control orientation
@@ -26,7 +26,7 @@ hold on
 jointDesired = 6;
 
 % Plot the robot in the zero config
-q = [0,0,0,0,0]';
+q = [.9, 0, 1, -1, -pi/2]';
 [jointPos,T] = calculateFK(q);
 for joint=1:5
     linkPoint1 = jointPos(joint,:);
