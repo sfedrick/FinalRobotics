@@ -1,5 +1,5 @@
 function final(color)
-    % color = 'blue';
+     color = 'blue';
     global lynx % necessary to use ArmController inside a function
     lynx = ArmController(color);
 
@@ -14,7 +14,7 @@ function final(color)
    [name,pose,twist] = lynx.get_object_state();
 
    %q=[0.9, pi/4, -0.3, -0.3, -pi/2, 0];
-   q = [0, 0, 0, 0, 0,0];
+   q = [.9, 0, 1, -1, -pi/2,30];
     lynx.set_pos(q); % used to set position to q
 %set velocity
 %lynx.set_vel(dq)
