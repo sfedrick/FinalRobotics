@@ -6,9 +6,9 @@ function final(color)
     pause(1)
 
     % interact with simulator, such as...
-     q1=[-1, 0, 0, 0, 0, 0];
-    fprintf('\n here \n\n\n');
-    lynx.set_pos(q1);
+     q1=[-0.6246, 0.5980, 0.0825, -0.6805, -1.57, 30];
+     fprintf('\n here \n\n\n');
+     lynx.set_pos(q1);
     disp(' there')
     % get state of your robot
     [q,qd]  = lynx.get_state()
