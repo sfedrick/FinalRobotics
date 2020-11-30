@@ -6,15 +6,18 @@ function final(color)
     pause(1)
 
     % interact with simulator, such as...
-     q1=[-0.6246, 0.5980, 0.0825, -0.6805, -1.57, 30];
+     q1=[0 0 0 0 0 0];
      fprintf('\n here \n\n\n');
      lynx.set_pos(q1);
     disp(' there')
+    pause(2)
     % get state of your robot
     [q,qd]  = lynx.get_state()
     % get state of scoreable objects
-   [name,pose,twist] = lynx.get_object_state();
-
+   %[name,pose,twist] = lynx.get_object_state();
+    %q2 = [-1.2140, 0.6590, -0.0870, -0.0140, 0, -0.0360];
+    [a, b] = calculateFK(q1)
+    
    
     % used to set position to q
     
