@@ -5,7 +5,7 @@ function [] = rotationdriver(color)
     %start = [.9, 0, 1, -1, -pi/2,30];
     %start=[0.75, 0.1, 0.9, -1, -pi/2,30];
     %start=[0.75, 0.1, 0.7, -0.8, -pi/2,30];
-    r=60;
+    r=40;
     start=findperfect(r);
     speed = 50;
     N = 1000;
@@ -29,7 +29,7 @@ function [] = rotationdriver(color)
     lynx.set_vel([0,0,0,0,0,0])
     [q,qd]  = lynx.get_state()
     
-    speed=1.5;
+    speed=1;
     [jointvel,configs] = MoveInCircle(r,speed,speed*100,q,1);
 %     
    for target_index = 1:length(jointvel(:,1))

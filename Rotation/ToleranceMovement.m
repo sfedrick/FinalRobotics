@@ -21,7 +21,7 @@ function [reached_target] = ToleranceMovement(lynx,desiredpos,error)
             elseif(posDiff<(error+(1/base))&& ~Based)
                 Based=true;
                 base=100;
-               % lynx.set_pos(desiredpos);  
+                %lynx.set_pos(desiredpos);  
             elseif(posDiff<(error+(1/base)))
                 reached_target = true;
             end
