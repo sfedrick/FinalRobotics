@@ -29,6 +29,7 @@ if(plot)
     hold on;
     plotJointPos(q0, [0,1,0],4);
 end
+prevError=inf;
 for i=1:N
     BreakN=i;
     q=configs(i,:);
@@ -39,9 +40,9 @@ for i=1:N
     jointvel(i+1,:)=qd;
     q = q+qd*dt;
     configs(i+1,:)=q;
-    [breaker,T0i]=calculateFK(q);
-    breaker=breaker(6,:);
-    if(abs(breaker(3)-endpos(3))>5)
+    [StopMe,normdiff]=LinStopper(q,endpos,0.1,prevError);
+    prevError=normdiff;
+    if(StopMe)
         break;
     end
     if(plot)
@@ -65,9 +66,10 @@ if(plot)
     axis equal;
     hold off;
 end
+buffer=0;
 if(BreakN<N) 
-    jointvel(BreakN:end,:)=[];
-    configs(BreakN:end,:)=[];
+    jointvel((BreakN-buffer):end,:)=[];
+    configs((BreakN-buffer):end,:)=[];
 end
 end
 
