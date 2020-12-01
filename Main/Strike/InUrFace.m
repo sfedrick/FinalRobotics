@@ -19,8 +19,8 @@ RoboFinger=RoboPose(1:3,Axis);
 N=length(pose);
 %transform 
 if(strcmp(color,'red'))
-    H=[1,0,0,-200;
-       0,1,0,-200;
+    H=[1,0,0,200;
+       0,1,0,200;
        0,0,1,0;
        0,0,0,1];
 elseif(strcmp(color,'blue'))
