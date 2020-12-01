@@ -6,11 +6,10 @@ function [] = static(color)
     
     pause(2)
     
-    [q,qd]  = lynx.get_state()
 
-    % get state of scoreable objects
-   [name,pose,twist] = lynx.get_object_state();
-   
+    [q,qd]  = lynx.get_state();
+ 
+
    % define variables
    if strcmp(color, 'blue')
        Trg = [-1 0 0 200; 0 -1 0 200; 0 0 1 0; 0 0 0 1];  % transf matrix from ground to robot base.
@@ -25,6 +24,7 @@ function [] = static(color)
    else
        error('Sorry, wrong color name!')
    end
+   h = 50;   % safety height.
 %     name
 %     celldisp(pose)
 %     celldisp(twist)
@@ -37,21 +37,22 @@ function [] = static(color)
 %     [n ~]=find(st > 0);
 %     
     %find euclidean distance between goal and closes 4 objects
-    [q0, ~] = lynx.get_state();
+%     [q0, ~] = lynx.get_state();
     %goalTrans= [0, 0, 1, (goal(1)-200); 0, -1, 0, (goal(2)-200); 1, 0, 0, (goal(3) + 50); 0, 0, 0, 1];
-    goal_b = [0, -1, 0, 110; -1, 0, 0, -285; 0, 0, -1, 100; 0, 0, 0, 1];
+%     goal_b = [0, -1, 0, 110; -1, 0, 0, -285; 0, 0, -1, 100; 0, 0, 0, 1];
     %for blue only
-    [a ~]=size(name);
+    [name,pose,~] = lynx.get_object_state();
+    [a, ~]=size(name);
     
     dist = zeros(a,1);
     for i=1:a
         dist(i,1) = norm(pose{i}(1:2,4) - goal(1:2));
     end
-    dist
+%     dist
     
     priority=zeros(4,1);j=1;i=1;
     while sum(find(priority == 0) > 0) 
-        if ((dist(i,1) == min(dist(:,1))) & j < 5)
+        if ((dist(i,1) == min(dist(:,1))) && j < 5)
             priority(j,:)=i;
             j=j+1;
             dist(i,1) = 1000;
@@ -60,23 +61,26 @@ function [] = static(color)
             i=i+1;
         end
     end
-    priority
+%     priority
     
     for i=1:4
         static.name{i,1} = name{priority(i,:)};
         static.pose{i,1} = pose{priority(i,:)};
     end
-    %picking static block
-      celldisp(static.name)
-     celldisp(static.pose)
-    
+
+
+
 
 %     Tinput = [0, 1, 0, ax; 0, -1, 0, ay; -1, 0, 0, az; 0, 0, 0, 1];
  for i=1:4
-    %get the coordinate of the robot base in ground
-    base = inv(Trg) * [0;0;0;1] 
+
+    % update the position of the block in every loop.
+    [namelist,poselist,~] = lynx.get_object_state();
+    poses = getpose(static.name, poselist, namelist);
+    base = inv(Trg) * [0;0;0;1] ;
     base = base(1:3);
-    T_pick_g = PickedPose(static.pose{i}, base, 50); %desired picked pose in ground frame
+    T_pick_g = PickedPose(poses{i}, poses, base, h); %desired picked pose in ground frame
+
     T_pick_r = Trg * T_pick_g  ;           %desired picked pose in robot frame                
     q1 = calculateIK(T_pick_r);
     if isempty(q1)
@@ -85,35 +89,12 @@ function [] = static(color)
         q1 = calculateIK(T_pick_r);
         q1 = [ q1(1:4), -pi/2];
         disp("basic pose")
+
     end
-    q1 = [q1, 20]
-    
-    lynx.command(q1);
-    pause(1)
-    [q ~] = lynx.get_state();
-    
-    reach = 0;
-    count=0;
-    % reach 50 mm above the object
-    while (reach == 0)
-        [q, ~] = lynx.get_state()
-        pause(0.1)
-        lynx.command(q1)
-        count=count+1;
-        if count>30
-            break;
-        end
-        disp("reaching")
-        reachNorm = norm(q-q1)
-        if reachNorm < 0.1
-            reach = 1;
-        else
-            lynx.command(q1)
-        end
-    end
-    
-    disp("reach complete");
-    pause(0.5)
+    q1 = [q1, 20];
+   
+    move(q1, lynx)
+
     
     T_down_g = T_pick_g - [zeros(3), [0;0;35];0 0 0 0];
     T_down_r = Trg * T_down_g  ;           %desired picked pose in robot frame                
@@ -124,120 +105,63 @@ function [] = static(color)
         T_pick_r2 = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)+20; 0, 0, 0, 1];
         qdown = calculateIK(T_pick_r2);
         qdown = [qdown(1:4), -pi/2];
+
     end
     qdown = [qdown, 20];
-    lynx.command(qdown);
-    pause(2)
-    dive = 0;
-    count=0;
-    while (dive == 0)
-        [q, ~] = lynx.get_state()
-         diveNorm = norm(q - qdown)
-        disp("diving")
-        count = count + 1;
-        if count>30
-            break;
-        end
-        if norm(q - qdown) < 0.2
-            dive = 1;
-        else
-            lynx.command(qdown);
-        end
-    end
-    disp("Dive complete");
-    pause(1)
+    
+    move(qdown, lynx)
+    
     %grab the object
     qGrab = [qdown(1:5), -15];
+
     
     lynx.command(qGrab);
     grab = 0;
-    pause(1)
-    
+    pause(1)   
 
     
-    Tpick = T_pick_r;
-    [qpick, ~] = calculateIK(Tpick);
-    qPick = [qpick, -15]
+%     Tpick = T_pick_r;
+%     [qpick, ~] = calculateIK(Tpick);
+    qpick = [q1(1:5), -15];
     %qPick
-    lynx.command(qPick);
-    pause(0.5)
-    pick = 0;
-    count=0;
-    while (pick == 0)
-        [q, ~] = lynx.get_state()
-        disp("picking")
-        count=count+1;
-        if count>30
-            break;
-        end
-        qPick
-        pickNorm = norm(q(1:5)-qPick(1:5))
-        if pickNorm < 0.5
-            pick = 1;
-        else
-        lynx.command(qPick);
-        end
-    end
-    disp("Pick complete");
+
+%       NOte that:      pickNorm = norm(q(1:5)-qPick(1:5))
+    move(qpick, lynx)
     
     %stacks of more than 2 are risky as any slight movement by robot
     %will make them fall. Hence, made 2 different positions for
     %two stacks of 2 static blocks
-    Move  = 0; goal_trans
     if i<3
-        Tplace = goal_trans + [ zeros(1,3), -40; zeros(1,4); 0, 0, 0, (i * 20); zeros(1,4)];
+        Tplace = goal_trans + [ zeros(1,3), -40; zeros(1,4); 0, 0, 0, 70; zeros(1,4)];
     else
-        Tplace = goal_trans + [ zeros(1,3), +10; zeros(1,4); 0, 0, 0, ((i-2) * 20); zeros(1,4)];
+        Tplace = goal_trans + [ zeros(1,3), -10; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
     end
     [qPlace, ~] = calculateIK(Tplace);
     qPlace = [qPlace, -15];
-    lynx.command(qPlace)
-    pause(2)
-    count=0;
-    while (Move == 0)
-        [q, ~] = lynx.get_state();
-        qPlace
-        count=count+1
-        if count>30
-            break
-        end
-        moveNorm = norm (q(1:5) - qPlace(1:5))
-        if moveNorm < 0.6
-            Move = 1;
-%         else
-%             lynx.command(qPlace);
-        end
-    end
     
-    disp("Move complete");
-    TDrop = goal_trans;
-    [qDrop, ~] = calculateIK(TDrop);
-    qDrop = [qPlace(1:5), 30];
-    pause(1)
+    move(qPlace, lynx)
+    
+    % move down to place the block
+%     Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, h -20; zeros(1,4)];
+    if i<3
+        Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, (60 - i*20); zeros(1,4)];
+    else
+        Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, (50 - (i-2)*20) ;zeros(1,4)];
+    end
+    qdown2 = calculateIK(Tdown2);
+    qdown2 = [qdown2, -15];
+    move(qdown2, lynx)
+%     TDrop = goal_trans;
+%     [qDrop, ~] = calculateIK(TDrop);
+    qDrop = [qdown2(1:5), 30];
     lynx.command(qDrop)
-    pause(1)
-    drop = 0;
-    count=0;
-    while (drop == 0)
-        [q, ~] = lynx.get_state();
-        normDrop = norm(q - qDrop)
-        count=count+1;
-        if count>30
-            break;
-        end
-        if normDrop < 0.5
-            drop = 1;
-        else
-            lynx.command(qDrop);
-        end
-    end
-    
-    disp("Object Dropped");
+    pause(0.5)
     %move to qEnd. qEnd acts as an intermediate position so that
     %the robot doesnot hit a block while moving to another block
     %this is done by retracting the robot upwards towards qEnd
-    qEnd = [0, 0,qPlace(3:5), 30];
-    lynx.command(qEnd);
+    qEnd = [qPlace(1:5), 30];
+     move(qEnd, lynx)
+
     pause(1)
     
     disp(" Placed static object ");
