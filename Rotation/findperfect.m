@@ -1,10 +1,13 @@
 %find strike positions 
 function [q,isPos] = findperfect(r)
 %[0.75, 0.1, 0.7, -0.8, -pi/2,30]
+
+%further from table
 %[1.1, 0.1, 0.7, -0.8, -pi/2,30]
 %closer to table
 %[1.1000    0.1670    0.7030   -0.8680 -pi/2 30]
-   [jointPositions,T0i] = calculateFK([1.1, 0.1, 0.7, -0.8, -pi/2-0.1,30]);
+
+   [jointPositions,T0i] = calculateFK([1.1000    0.1670    0.7030   -0.8680 -pi/2 30]);
     endpos=[200,200,T0i(3,4)];
     pos=[T0i(1,4),T0i(2,4),T0i(3,4)];
     posdif=endpos-pos;

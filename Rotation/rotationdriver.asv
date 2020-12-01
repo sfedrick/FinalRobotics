@@ -5,7 +5,7 @@ function [] = rotationdriver(color)
     %start = [.9, 0, 1, -1, -pi/2,30];
     %start=[0.75, 0.1, 0.9, -1, -pi/2,30];
     %start=[0.75, 0.1, 0.7, -0.8, -pi/2,30];
-    r=10;
+    r=40;
     start=findperfect(r);
     speed = 50;
     N = 1000;
@@ -41,11 +41,7 @@ function [] = rotationdriver(color)
     
         
          ToleranceMovement(lynx,q,error);
-        [WithInFace,BoxesInUrFace] = InUrFace(lynx,color,100,0.7,3);
-        if(WithInFace)
-            lynx.set_vel([0,0,0,0,0,0]);
-            break;
-        end
+       [WithInFace,BoxesInUrFace] = InUrFace(lynx,color,100,0.7,3);
         disp("Current Configuration:");
         [pos, vel] = lynx.get_state();
      disp(pos);
