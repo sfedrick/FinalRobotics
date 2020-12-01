@@ -159,7 +159,9 @@ function [] = static(color)
     %move to qEnd. qEnd acts as an intermediate position so that
     %the robot doesnot hit a block while moving to another block
     %this is done by retracting the robot upwards towards qEnd
-    qEnd = [qPlace(1:5), 30];
+    
+    qEnd = [0, 0, qPlace(3:5), 30];
+    
      move(qEnd, lynx)
 
     pause(1)
@@ -167,9 +169,8 @@ function [] = static(color)
     disp(" Placed static object ");
     % Tranformation matrix at goal
     
-    
-    sDone =1;
-   % lynx.set_pos(q);
+  
+
  end   
 %%% manual testss end
  % %   get state of your opponent's robot

@@ -1,11 +1,12 @@
 function final(color)
     global lynx % necessary to use ArmController inside a function
     lynx = ArmController(color);
-    pause(1);
+    pause(2);
 % 
 %    [name,pose,twist] = lynx.get_object_state();
   r=0;
   %q=findperfect(r);
+  %lynx.set_vel([0,0,0,0,0,0]);
 %q=[-0.747,0.587,-0.281,1.272,-0.586,20];
 q=[0, 0,0,0,0,0];
 %velq=[10, 0,0,0,0,0];
@@ -15,8 +16,9 @@ q=[0, 0,0,0,0,0];
 lynx.set_pos(q); % used to set position to q
 %lynx.set_vel(velq);
 tic
- ToleranceMovement(lynx,q,0.1);
- lynx.set_vel([0,0,0,0,0,0]);
+ 
+ %lynx.set_vel([0,-10,-10,0,0,0]);
+  ToleranceMovement(lynx,q,0.1);
 toc
 [q,qd]  = lynx.get_state()
 % % %   get state of your opponent's robot 
