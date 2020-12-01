@@ -1,13 +1,15 @@
 function [] = static(color)
-    color='blue';
+    %color='red';
     global lynx
     lynx = ArmController(color);
     % get state of your robot
     
     pause(2)
     
+
     [q,qd]  = lynx.get_state();
  
+
    % define variables
    if strcmp(color, 'blue')
        Trg = [-1 0 0 200; 0 -1 0 200; 0 0 1 0; 0 0 0 1];  % transf matrix from ground to robot base.
@@ -66,16 +68,19 @@ function [] = static(color)
         static.pose{i,1} = pose{priority(i,:)};
     end
 
-    
+
+
 
 %     Tinput = [0, 1, 0, ax; 0, -1, 0, ay; -1, 0, 0, az; 0, 0, 0, 1];
  for i=1:4
+
     % update the position of the block in every loop.
     [namelist,poselist,~] = lynx.get_object_state();
     poses = getpose(static.name, poselist, namelist);
     base = inv(Trg) * [0;0;0;1] ;
     base = base(1:3);
     T_pick_g = PickedPose(poses{i}, poses, base, h); %desired picked pose in ground frame
+
     T_pick_r = Trg * T_pick_g  ;           %desired picked pose in robot frame                
     q1 = calculateIK(T_pick_r);
     if isempty(q1)
@@ -84,10 +89,12 @@ function [] = static(color)
         q1 = calculateIK(T_pick_r);
         q1 = [ q1(1:4), -pi/2];
         disp("basic pose")
+
     end
     q1 = [q1, 20];
-    
+   
     move(q1, lynx)
+
     
     T_down_g = T_pick_g - [zeros(3), [0;0;35];0 0 0 0];
     T_down_r = Trg * T_down_g  ;           %desired picked pose in robot frame                
@@ -98,6 +105,7 @@ function [] = static(color)
         T_pick_r2 = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)+20; 0, 0, 0, 1];
         qdown = calculateIK(T_pick_r2);
         qdown = [qdown(1:4), -pi/2];
+
     end
     qdown = [qdown, 20];
     
@@ -105,6 +113,7 @@ function [] = static(color)
     
     %grab the object
     qGrab = [qdown(1:5), -15];
+
     
     lynx.command(qGrab);
     grab = 0;
@@ -115,6 +124,7 @@ function [] = static(color)
 %     [qpick, ~] = calculateIK(Tpick);
     qpick = [q1(1:5), -15];
     %qPick
+
 %       NOte that:      pickNorm = norm(q(1:5)-qPick(1:5))
     move(qpick, lynx)
     
@@ -151,6 +161,7 @@ function [] = static(color)
     %this is done by retracting the robot upwards towards qEnd
     qEnd = [qPlace(1:5), 30];
      move(qEnd, lynx)
+
     pause(1)
     
     disp(" Placed static object ");
