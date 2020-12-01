@@ -1,5 +1,5 @@
 function [] = static(color)
-    color='red';
+    %color='red';
     global lynx
     lynx = ArmController(color);
     % get state of your robot
