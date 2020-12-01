@@ -13,12 +13,12 @@ function [] = static(color)
    if strcmp(color, 'blue')
        Trg = [-1 0 0 200; 0 -1 0 200; 0 0 1 0; 0 0 0 1];  % transf matrix from ground to robot base.
        goal = [ 30; 470; 40];
-       
+       goal_trans = [0, -1, 0, 110; -1, 0, 0, -285; 0, 0, -1, 100; 0, 0, 0, 1];
        
    elseif strcmp(color, 'red')
        Trg = [1 0 0 200; 0 1 0 200; 0 0 1 0; 0 0 0 1];
        goal = [ -30; -470; 40];  
-       
+       goal_trans = [0, -1, 0, 110; -1, 0, 0, -285; 0, 0, -1, 100; 0, 0, 0, 1];
        
    else
        error('Sorry, wrong color name!')
@@ -65,21 +65,11 @@ function [] = static(color)
         static.pose{i,1} = pose{priority(i,:)};
     end
     %picking static block
-%     celldisp(static.name)
-%     celldisp(static.pose)
+     celldisp(static.name)
+    celldisp(static.pose)
     
-    %for i=1:4
-    static.pose{1}
-    %transforming box into robot's frame
 
-%     T = Trg * static.pose{1};
-%     ax = T(1, 4);
-%     ay = T(2, 4);
-%     az = T(3, 4)+50;
-%     Tinput = [0, 0, 1, ax; 0, -1, 0, ay; 1, 0, 0, az; 0, 0, 0, 1];
-%     [q, ~] = calculateIK(Tinput)
-%     q1 = q(1, 1:4);
-%     q1 = [q1, -pi/2, 30];
+%     Tinput = [0, 1, 0, ax; 0, -1, 0, ay; -1, 0, 0, az; 0, 0, 0, 1];
 
     %get the coordinate of the robot base in ground
     base = inv(Trg) * [0;0;0;1] 
@@ -87,7 +77,9 @@ function [] = static(color)
     T_pick_g = PickedPose(static.pose{1}, base, 50); %desired picked pose in ground frame
     T_pick_r = Trg * T_pick_g  ;           %desired picked pose in robot frame                
     q1 = calculateIK(T_pick_r);
-    q1 = [q1, 30];
+%     if isempty(q1)
+%         Tinput = [0, 1, 0, ax; 0, -1, 0, ay; -1, 0, 0, az; 0, 0, 0, 1];
+    q1 = [q1, 20]
     
     lynx.set_pos(q1);
     pause(3)
@@ -107,12 +99,12 @@ function [] = static(color)
     end
     
     disp("reach complete");
+    pause(5)
     
-    
-    T_down_g = T_pick_g - [zeros(3), [0;0;33];0 0 0 0];
+    T_down_g = T_pick_g - [zeros(3), [0;0;40];0 0 0 0];
     T_down_r = Trg * T_down_g  ;           %desired picked pose in robot frame                
     qdown = calculateIK(T_down_r);
-    qdown = [qdown 30];
+    qdown = [qdown 20];
     lynx.set_pos(qdown);
     dive = 0;
         
@@ -129,7 +121,7 @@ function [] = static(color)
     
     %grab the object
     qGrab = [qdown(1:5), -15];
-    pause(3)
+    pause(5)
     lynx.set_pos(qGrab);
     grab = 0;
     pause(5)
@@ -138,13 +130,18 @@ function [] = static(color)
     
     Tpick = T_pick_r;
     [qpick, ~] = calculateIK(Tpick);
-    qPick = [qpick, -15];
+    qPick = [qpick, -15]
+    %qPick
     lynx.set_pos(qPick);
     pick = 0;
-    
+    i=0;
     while (pick == 0)
+        i=i+1;
+        if i==50
+            break
+        end
         [q, ~] = lynx.get_state()
-        %disp("picking")
+        disp("picking")
         qPick
         pickNorm = norm(q(1:5)-qPick(1:5))
         if pickNorm < 0.5
@@ -154,31 +151,36 @@ function [] = static(color)
     end
     disp("Pick complete");
     
-    Move  = 0; goal_b
-    Tplace = goal_b;
+    Move  = 0; goal_trans
+    Tplace = goal_trans;
     [qPlace, ~] = calculateIK(Tplace);
     qPlace = [qPlace, -15];
     lynx.set_pos(qPlace)
-    
+    i=0;
     while (Move == 0)
         [q, ~] = lynx.get_state();
         lynx.set_pos(qPlace);
-        moveNorm = norm (q(1:5) - qPlace(1:5));
-        if moveNorm < 0.05
+        qPlace
+        i=i+1;
+        if i>50
+            break
+        end
+        moveNorm = norm (q(1:5) - qPlace(1:5))
+        if moveNorm < 0.5
             Move = 1;
         end
     end
     
     disp("Move complete");
-    TDrop = goalTrans;
-    [qDrop, ~] = calculateIK(Tdrop);
+    TDrop = goal_trans;
+    [qDrop, ~] = calculateIK(TDrop);
     qDrop = [qDrop, 30];
     lynx.set_pos(qDrop)
     drop = 0;
     
     while (drop == 0)
-        [q, ~] = lynx.get_pos();
-        if norm(q - qDrop) < -0.05
+        [q, ~] = lynx.get_state();
+        if norm(q - qDrop) < 0.5
             drop = 1;
         end
     end
