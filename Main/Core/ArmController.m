@@ -12,6 +12,7 @@ classdef ArmController < handle
         % publishers    
         position_pub;
         velocity_pub;
+        setpoint_pub;
         effort_pub;
         
         % data
@@ -64,6 +65,7 @@ classdef ArmController < handle
 
             
             obj.position_pub = rospublisher(strcat(namespace,'/arm_interface/position'), 'sensor_msgs/JointState');  
+            obj.setpoint_pub = rospublisher(strcat(namespace,'/arm_interface/setpoint'), 'sensor_msgs/JointState');  
             obj.velocity_pub = rospublisher(strcat(namespace,'/arm_interface/velocity'), 'sensor_msgs/JointState');  
             obj.effort_pub = rospublisher(strcat(namespace,'/arm_interface/effort'), 'sensor_msgs/JointState');  
 
@@ -98,12 +100,18 @@ classdef ArmController < handle
             send(obj.position_pub,msg);
         end
 
+        function command(obj, q)
+            msg = rosmessage('sensor_msgs/JointState');
+            msg.Position = q;
+            send(obj.setpoint_pub,msg);
+        end
+
         function set_vel(obj, qd)
             msg = rosmessage('sensor_msgs/JointState');
             msg.Velocity = qd;
             send(obj.velocity_pub,msg);
         end
-
+        
         function set_tau(obj, tau)
             msg = rosmessage('sensor_msgs/JointState');
             msg.Effort = tau;
