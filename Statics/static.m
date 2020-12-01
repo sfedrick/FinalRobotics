@@ -198,7 +198,7 @@ function [] = static(color)
         [q, ~] = lynx.get_state();
         qPlace
         count=count+1
-        if i>30
+        if count>30
             break
         end
         moveNorm = norm (q(1:5) - qPlace(1:5))
