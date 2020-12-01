@@ -1,5 +1,5 @@
 function [] = static(color)
-    color='blue';
+    color='red';
     global lynx
     lynx = ArmController(color);
     % get state of your robot
@@ -67,8 +67,8 @@ function [] = static(color)
         static.pose{i,1} = pose{priority(i,:)};
     end
     %picking static block
-%      celldisp(static.name)
-%     celldisp(static.pose)
+      celldisp(static.name)
+     celldisp(static.pose)
     
 
 %     Tinput = [0, 1, 0, ax; 0, -1, 0, ay; -1, 0, 0, az; 0, 0, 0, 1];
@@ -79,6 +79,13 @@ function [] = static(color)
     T_pick_g = PickedPose(static.pose{i}, base, 50); %desired picked pose in ground frame
     T_pick_r = Trg * T_pick_g  ;           %desired picked pose in robot frame                
     q1 = calculateIK(T_pick_r);
+    if isempty(q1)
+        T_pick_g = Trg * static.pose{i};
+        T_pick_r = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)+50; 0, 0, 0, 1];
+        q1 = calculateIK(T_pick_r);
+        q1 = [ q1(1:4), -pi/2];
+        disp("basic pose")
+    end
     q1 = [q1, 20]
     
     lynx.command(q1);
@@ -86,11 +93,16 @@ function [] = static(color)
     [q ~] = lynx.get_state();
     
     reach = 0;
+    count=0;
     % reach 50 mm above the object
     while (reach == 0)
         [q, ~] = lynx.get_state()
         pause(0.1)
         lynx.command(q1)
+        count=count+1;
+        if count>30
+            break;
+        end
         disp("reaching")
         reachNorm = norm(q-q1)
         if reachNorm < 0.1
@@ -106,15 +118,26 @@ function [] = static(color)
     T_down_g = T_pick_g - [zeros(3), [0;0;35];0 0 0 0];
     T_down_r = Trg * T_down_g  ;           %desired picked pose in robot frame                
     qdown = calculateIK(T_down_r);
-    qdown = [qdown 20];
+    
+    if isempty(qdown)
+        T_pick_g = Trg * static.pose{i};
+        T_pick_r2 = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)+20; 0, 0, 0, 1];
+        qdown = calculateIK(T_pick_r2);
+        qdown = [qdown(1:4), -pi/2];
+    end
+    qdown = [qdown, 20];
     lynx.command(qdown);
-    pause(1)
+    pause(2)
     dive = 0;
-        
+    count=0;
     while (dive == 0)
         [q, ~] = lynx.get_state()
          diveNorm = norm(q - qdown)
         disp("diving")
+        count = count + 1;
+        if count>30
+            break;
+        end
         if norm(q - qdown) < 0.2
             dive = 1;
         else
@@ -139,9 +162,14 @@ function [] = static(color)
     lynx.command(qPick);
     pause(0.5)
     pick = 0;
+    count=0;
     while (pick == 0)
         [q, ~] = lynx.get_state()
         disp("picking")
+        count=count+1;
+        if count>30
+            break;
+        end
         qPick
         pickNorm = norm(q(1:5)-qPick(1:5))
         if pickNorm < 0.5
@@ -165,9 +193,14 @@ function [] = static(color)
     qPlace = [qPlace, -15];
     lynx.command(qPlace)
     pause(2)
+    count=0;
     while (Move == 0)
         [q, ~] = lynx.get_state();
         qPlace
+        count=count+1
+        if i>30
+            break
+        end
         moveNorm = norm (q(1:5) - qPlace(1:5))
         if moveNorm < 0.6
             Move = 1;
@@ -184,10 +217,14 @@ function [] = static(color)
     lynx.command(qDrop)
     pause(1)
     drop = 0;
-    
+    count=0;
     while (drop == 0)
         [q, ~] = lynx.get_state();
         normDrop = norm(q - qDrop)
+        count=count+1;
+        if count>30
+            break;
+        end
         if normDrop < 0.5
             drop = 1;
         else
