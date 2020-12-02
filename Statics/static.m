@@ -109,9 +109,9 @@ function [] = static(color)
     %will make them fall. Hence, made 2 different positions for
     %two stacks of 2 static blocks
     if i<3
-        Tplace = goal_trans + [ zeros(1,3), -40; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
-    else
         Tplace = goal_trans + [ zeros(1,3), -15; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
+    else
+        Tplace = goal_trans + [ zeros(1,3), +10; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
     end
     [qPlace, ~] = calculateIK(Tplace);
     qPlace = [qPlace, -15];
