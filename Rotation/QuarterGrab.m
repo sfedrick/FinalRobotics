@@ -1,4 +1,4 @@
-function [Stop] = QuarterGrab(lynx,qold,Error)
+function [Stop] = QuarterGrab(q,qold,Error)
 % This function alerts you when the robot has a completed a quater rotation
 % around the table
 %lynx is the lynx variable from lynx=ArmController(color)
@@ -13,15 +13,19 @@ function [Stop] = QuarterGrab(lynx,qold,Error)
 %stopaxis is the axis you want to get close to
 %stop is a boolean
 Stop=false;
-
-[q,~]=lynx.get_state();
-
 [~,RoboPose] = calculateFK(q);
 [~,old] = calculateFK(qold);
-RoboFinger=RoboPose(1:3,3);
-StopAxis=old(1:3,3);
-QuarterGrab=StopAxis'*RoboFinger;
-if(QuarterGrab<(1-Error))
+RoboFingerZ=RoboPose(1:3,3);
+StopAxisZ=old(1:3,3);
+RoboFingerY=RoboPose(1:3,2);
+StopAxisY=old(1:3,2);
+StopAxisX=old(1:3,1);
+RoboFingerX=RoboPose(1:3,1);
+QuarterGrab2=StopAxisY'*RoboFingerY;
+QuarterGrab1=StopAxisX'*RoboFingerX;
+QuarterGrab3=StopAxisZ'*RoboFingerZ;
+qdiff=norm(q-qold);
+if(QuarterGrab2<(1-Error))
     Stop=true;
 end
 

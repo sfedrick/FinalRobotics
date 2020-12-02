@@ -14,7 +14,7 @@ function [] = rotationdriver(color,r)
     %[jointvel,configs] = MoveInRadial(start,[200,200,68],speed,N,0);
     
     %[row,col]=size(jointvel);
-    %[path] = astar(map, start, goal);
+   
 
     %start ROS
      global lynx
@@ -44,7 +44,7 @@ function [] = rotationdriver(color,r)
        
          [breakme]=ToleranceVelocity(lynx,q,0.1,100);
         
-        [WithInFace,BoxesInUrFace] = InUrFace(lynx,color,50,0.8,3);
+        [WithInFace,BoxesInUrFace] = InUrFace(lynx,color,50,0.9,3);
         
         [Stop] = QuarterGrab(q,qold,0.01);
         if(Stop||WithInFace)
@@ -66,7 +66,7 @@ function [] = rotationdriver(color,r)
    flipper=1;
    while(~close && (wait || WithInFace))
        counter=counter+1;
-       if(mod(counter,50)==0)
+       if(mod(counter,20)==0)
            flipper=flipper+1;
            if(mod(flipper,2)==0)
                 olddistancevec=distancevec;
@@ -75,11 +75,13 @@ function [] = rotationdriver(color,r)
            end
        end
        
-       [WithInFace,trash] = InUrFace(lynx,color,50,0.9,3);
-      [close,wait,BoxesInUrFace,speed,distancevec]=grip(lynx,WithInFace,BoxesInUrFace,color,20,0.5,50);
+       [WithInFace,trash] = InUrFace(lynx,color,30,0.8,3);
+      [close,wait,BoxesInUrFace,speed,distancevec]=grip(lynx,WithInFace,BoxesInUrFace,color,20,0.5,20);
       
-      if(dv<0.01 && norm(distancevec)<50)
+      if(dv<0.01 && norm(distancevec)<20)
           close=true;
+      else
+          
       end
    end
     if(close)
