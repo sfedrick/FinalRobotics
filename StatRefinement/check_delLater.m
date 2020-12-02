@@ -1,5 +1,6 @@
 
     addpath('../Main/Core')
+    addpath('../Main')
     color = 'blue';
    % global lynx % necessary to use ArmController inside a function
    % lynx = ArmController(color);

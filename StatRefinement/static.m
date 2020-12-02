@@ -2,7 +2,7 @@ function [] = static(color)
     tic
     global lynx
     lynx = ArmController(color);
-        
+    %test for uploading    
     pause(2)                                                                %set-up time for lynx
     
     [q,qd]  = lynx.get_state();
