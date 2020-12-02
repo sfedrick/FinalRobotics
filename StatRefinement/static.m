@@ -32,7 +32,6 @@ function [] = static(color)
     for i=1:a
         dist(i,1) = norm(pose{i}(1:2,4) - goal(1:2));
     end
-%     dist
     
     priority=zeros(4,1);j=1;i=1;
     while sum(find(priority == 0) > 0) 
@@ -45,7 +44,7 @@ function [] = static(color)
             i=i+1;
         end
     end
-%     priority
+
     
     for i=1:4
         static.name{i,1} = name{priority(i,:)};
@@ -100,10 +99,7 @@ function [] = static(color)
     pause(1)   
 
     qpick = [q1(1:5), -15];
-    
-
-%       NOte that:      pickNorm = norm(q(1:5)-qPick(1:5))
-    move(qpick, lynx)
+   move(qpick, lynx)
     
     %stacks of more than 2 are risky as any slight movement by robot
     %will make them fall. Hence, made 2 different positions for
@@ -118,8 +114,6 @@ function [] = static(color)
     
     move(qPlace, lynx)
     
-    % move down to place the block
-%     Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, h -20; zeros(1,4)];
     if i<3
         Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, (60 - i*20); zeros(1,4)];
     else
