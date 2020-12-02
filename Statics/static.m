@@ -1,5 +1,5 @@
 function [] = static(color)
-    %color='red';
+    tic
     global lynx
     lynx = ArmController(color);
     % get state of your robot
@@ -24,23 +24,7 @@ function [] = static(color)
    else
        error('Sorry, wrong color name!')
    end
-   h = 50;   % safety height.
-%     name
-%     celldisp(pose)
-%     celldisp(twist)
-
-%     for i=1:13
-%         if (sum(twist{i}) == 0)
-%             st(i,:) = 1;
-%         end
-%     end
-%     [n ~]=find(st > 0);
-%     
-    %find euclidean distance between goal and closes 4 objects
-%     [q0, ~] = lynx.get_state();
-    %goalTrans= [0, 0, 1, (goal(1)-200); 0, -1, 0, (goal(2)-200); 1, 0, 0, (goal(3) + 50); 0, 0, 0, 1];
-%     goal_b = [0, -1, 0, 110; -1, 0, 0, -285; 0, 0, -1, 100; 0, 0, 0, 1];
-    %for blue only
+   h = 50;   
     [name,pose,~] = lynx.get_object_state();
     [a, ~]=size(name);
     
@@ -68,10 +52,6 @@ function [] = static(color)
         static.pose{i,1} = pose{priority(i,:)};
     end
 
-
-
-
-%     Tinput = [0, 1, 0, ax; 0, -1, 0, ay; -1, 0, 0, az; 0, 0, 0, 1];
  for i=1:4
 
     % update the position of the block in every loop.
@@ -102,9 +82,9 @@ function [] = static(color)
     
     if isempty(qdown)
         T_pick_g = Trg * static.pose{i};
-        T_pick_r2 = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)+20; 0, 0, 0, 1];
+        T_pick_r2 = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)-5; 0, 0, 0, 1];
         qdown = calculateIK(T_pick_r2);
-        qdown = [qdown(1:4), -pi/2];
+        qdown = [qdown(1:3), -0.4, -pi/2];
 
     end
     qdown = [qdown, 20];
@@ -119,11 +99,8 @@ function [] = static(color)
     grab = 0;
     pause(1)   
 
-    
-%     Tpick = T_pick_r;
-%     [qpick, ~] = calculateIK(Tpick);
     qpick = [q1(1:5), -15];
-    %qPick
+    
 
 %       NOte that:      pickNorm = norm(q(1:5)-qPick(1:5))
     move(qpick, lynx)
@@ -132,9 +109,9 @@ function [] = static(color)
     %will make them fall. Hence, made 2 different positions for
     %two stacks of 2 static blocks
     if i<3
-        Tplace = goal_trans + [ zeros(1,3), -40; zeros(1,4); 0, 0, 0, 70; zeros(1,4)];
+        Tplace = goal_trans + [ zeros(1,3), -40; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
     else
-        Tplace = goal_trans + [ zeros(1,3), -10; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
+        Tplace = goal_trans + [ zeros(1,3), -15; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
     end
     [qPlace, ~] = calculateIK(Tplace);
     qPlace = [qPlace, -15];
@@ -151,28 +128,27 @@ function [] = static(color)
     qdown2 = calculateIK(Tdown2);
     qdown2 = [qdown2, -15];
     move(qdown2, lynx)
-%     TDrop = goal_trans;
-%     [qDrop, ~] = calculateIK(TDrop);
     qDrop = [qdown2(1:5), 30];
-    lynx.command(qDrop)
+    move(qDrop, lynx)
     pause(0.5)
+    
     %move to qEnd. qEnd acts as an intermediate position so that
     %the robot doesnot hit a block while moving to another block
     %this is done by retracting the robot upwards towards qEnd
+    qEnd = [-1.2, 0, 0.2, 0, qDrop(5:6)];
     
-    qEnd = [0, 0, qPlace(3:5), 30];
-    
+    %lynx.set_vel([1,0,0,0,0,0]);
+%     Tend = Tdown2 + [zeros(2,4); 0, 0, 0, 30; zeros(1,4)];
+%     qEnd = calculateIK(Tend)
+%     if isempty(qEnd)
+%         qEnd = [-1.2, 0.2, -0.2, qPlace(4:5)]
+%     end
+     %lynx.command(qEnd);
      move(qEnd, lynx)
-
-    pause(1)
-    
+     
     disp(" Placed static object ");
-    % Tranformation matrix at goal
-    
-  
-
- end   
-%%% manual testss end
+end   
+toc
  % %   get state of your opponent's robot
  %   [q,qd]  = lynx.get_opponent_state()
 end

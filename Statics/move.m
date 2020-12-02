@@ -7,7 +7,7 @@ function move(qfinal, lynx)
     % reach 50 mm above the object
     while (reach == 0)
         [q, ~] = lynx.get_state();
-        pause(0.1)
+        pause(0.05)
         lynx.command(qfinal)
         count=count+1;
         if count>30
@@ -24,5 +24,5 @@ function move(qfinal, lynx)
     end
     
     disp("reach complete");
-    pause(0.5)
+    %pause(0.1)
 end
