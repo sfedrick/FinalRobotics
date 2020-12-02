@@ -121,7 +121,7 @@ function [] = static(color)
     move(qDrop, lynx)
     pause(0.5)
     
-    qEnd = [-1.2, 0, 0.2, 0, qDrop(5:6)];                                   %move to qEnd. qEnd acts as an intermediate position so that
+    qEnd = [-0.8, qDrop(2:6)];                                   %move to qEnd. qEnd acts as an intermediate position so that
                                                                             %the robot doesnot hit a block while moving to another block
     %lynx.set_vel([1,0,0,0,0,0]);                                           %this is done by retracting the robot upwards towards qEnd
     
