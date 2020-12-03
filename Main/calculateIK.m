@@ -185,12 +185,6 @@ jj = 1; %random parameter for loop
  end               
  %if q does not change, clear it-
         if ~sum(~(q == [0 0 0 0 0]))
-           
-            fprintf('\n');
-            fprintf('\n');
-            disp(' ALL solutions are out of the joint limits ! ! ')
-            fprintf('\n');
-            fprintf('\n');
             q = [];
             
         end

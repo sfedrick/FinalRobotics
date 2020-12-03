@@ -1,4 +1,5 @@
-function [breakme] = ToleranceMovement(lynx,desiredpos,error,base)
+function [breakme] = ToleranceVelocity(lynx,desiredpos,error,base)
+     
         reached_target = false;
         i=0;
         
@@ -19,10 +20,14 @@ function [breakme] = ToleranceMovement(lynx,desiredpos,error,base)
             posDiff=norm(pos(1:5)-desiredpos(1:5));
             if(posDiff<(error))
                 reached_target = true;
+            elseif(posDiff<(error+(1/base)))
+                reached_target = true;
+            elseif(base<0)
+             breakme=true;
+             reached_target = true;
             end
             pause(0.1)
             % End of student code
         end
-   
 end
 

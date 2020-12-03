@@ -45,8 +45,7 @@ BoxesInUrFace=[];
         
         VecToBox=BoxLocation-EndLocation;
         if(flip)
-            VecToBox=-VecToBox;
-        end
+
         normVecTOBox=norm(VecToBox);
         UnitVecToBox=VecToBox/normVecTOBox;
         dotProduct=UnitVecToBox'*RoboFinger;
