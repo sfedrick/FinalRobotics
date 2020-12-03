@@ -9,7 +9,7 @@ dynamicTwist = {};
 count = 1; % for which cell to add to 
 
 % get objects from env
-[name,pose,twist] = lynx.get_object_state();
+[name,pose,twist] = lynx.get_state();
 
 % only get moving boxes
 for i=1:length(twist)

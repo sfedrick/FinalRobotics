@@ -1,5 +1,5 @@
-function [] = rotationdriver(color,r)
-
+function [close] = rotationdriver(lynx,color,r)
+disp("I ran");
     %% Simulation Parameters
 
     %start = [.9, 0, 1, -1, -pi/2,30];
@@ -8,29 +8,16 @@ function [] = rotationdriver(color,r)
     
    
     %start= 1.2750    0.1350    0.8110   -0.9460   -1.6890];
-    start=findperfect(-20,15);
-    % Find collision-free path using RRT to get list of waypoints
-    
-    %[jointvel,configs] = MoveInRadial(start,[200,200,68],speed,N,0);
-    
-    %[row,col]=size(jointvel);
-    %[path] = astar(map, start, goal);
-
-    %start ROS
-     global lynx
-    lynx = ArmController(color);
-    pause(1);% wait for setup
-    %collision = false;
-    
+    [start,~]=findperfect(-20,15);
     lynx.set_pos(start);
     ToleranceMovement(lynx,start,0.1,1000);
     %r = calculateRadiusForEndEff(lynx,color);
-  start=findperfect(r,-10);  
+  [start,~]=findperfect(r,-10);  
     lynx.set_pos(start);
     ToleranceMovement(lynx,start,0.1,1000);
 
     [q,qd]  = lynx.get_state()
-    [jointvel,configs] = MoveInCircle(r,1,50,q,1);
+    [jointvel,configs] = MoveInCircle(r,1,50,q,0);
     qold=q;
 
    for target_index = 1:length(jointvel(:,1))
@@ -45,7 +32,7 @@ function [] = rotationdriver(color,r)
        
          [breakme]=ToleranceVelocity(lynx,q,0.1,100);
         
-        [WithInFace,BoxesInUrFace] = InUrFace(lynx,color,50,0.8,3);
+        [WithInFace,BoxesInUrFace] = InUrFace(lynx,color,30,0.8,3);
         
         [Stop] = QuarterGrab(q,qold,0.01);
         if(Stop||WithInFace)
@@ -81,25 +68,16 @@ function [] = rotationdriver(color,r)
           close=true;
       end
    end
-    if(close)
-       lynx.set_vel([0,0,0,0,0,-100]) 
-      pause(1); 
-      lynx.set_pos([0,0,0,0,0,-15])
-       ToleranceMovement(lynx,[0,0,0,0,0,-15],0.1,1000);
-       [q,qd]  = lynx.get_state()
-       if(q(6)<1)
-           rotationdriver(color,r)
-       end
-    else
-        rotationdriver(color,r)
-    end
-%     display("finshed");
-%     lynx.set_vel([0,0,0,0,0,0])
-%     if collision
-%         disp("Robot collided during move")
-%     else
-%         disp("No collision detected")
-%     end
+ 
+[ender,~]= lynx.get_state();
+ender(6)=-100;
+if(close)
+   ToleranceMovement(lynx,ender,0.1,1000);
+end
+[pos, ~] = lynx.get_state(); 
+if(pos(6)<2)
+    close=false;
+end
 
     
 end

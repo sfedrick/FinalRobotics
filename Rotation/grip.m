@@ -33,7 +33,7 @@ elseif(strcmp(color,'blue'))
 end
 closestbox=inf;
  for i=1:length(listname)
-     box=H'*pose{listname(i)};
+     box=H*pose{listname(i)};
      boxposition=box(1:3,4);
      distancevec=boxposition-EndLocation;
      error=norm(distancevec);
