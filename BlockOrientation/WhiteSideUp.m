@@ -56,7 +56,9 @@ function [Tout, change] = WhiteSideUp(Tin, pose)
 	
 	elseif product  == -1
 		change = 2;
-		Tout = Tin * minusNinety;
+		%%%This is where the block would take TWO steps
+        %%% This will take a lot of time, we can just ignore this part
+        Tout = Tin;
 	end
 
 end

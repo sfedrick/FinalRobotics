@@ -20,7 +20,7 @@ function [] = static(color)
    else
        error('Sorry, wrong color name!')
    end
-    h = 50;                                                                  %h is buffer height above the block
+    h = 70;                                                                  %h is buffer height above the block
     [name,pose,~] = lynx.get_object_state();                                 %h is used while approaching the block
     [a, ~]=size(name);
     
@@ -79,7 +79,7 @@ function [] = static(color)
     move(q1, lynx)                                                          %move is defined function
 
     
-    T_down_g = T_pick_g - [zeros(3), [0;0;35];0 0 0 0];
+    T_down_g = T_pick_g - [zeros(3), [0;0;65];0 0 0 0];
     T_down_r = Trg * T_down_g  ;                                            %desired picked pose in robot frame                
     qdown = calculateIK(T_down_r);
     
