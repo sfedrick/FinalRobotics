@@ -2,7 +2,7 @@ function [] = static(color)
     tic
     global lynx
     lynx = ArmController(color);
-    %test for uploading    
+        
     pause(2)                                                                %set-up time for lynx
     
     [q,qd]  = lynx.get_state();
@@ -53,18 +53,9 @@ function [] = static(color)
     poses = getpose(static.name, poselist, namelist);
     base = inv(Trg) * [0;0;0;1] ;
     base = base(1:3);
-    [T_pick_g, Flag] = PickedPose(poses{i}, poses, base, h);                        %desired picked pose in ground frame
+    T_pick_g = PickedPose(poses{i}, poses, base, h);                        %desired picked pose in ground frame
 
-    T_pick_r = Trg * T_pick_g  ;
-    %%%%%%%%%%%%
-    if Flag == 0
-	    [T, change] = WhiteSideUp(T_pick_r, (poses{i} * Trg));
-        if change == 1
-            T_pick_r = T;
-        end
-    end
-    %%%%%%%%%%%
-    %desired picked pose in robot frame                
+    T_pick_r = Trg * T_pick_g  ;                                            %desired picked pose in robot frame                
     q1 = calculateIK(T_pick_r);                                             %all picked poses are with gripr-vertical orientation
     if isempty(q1)
         T_pick_g = Trg * static.pose{i};
@@ -72,7 +63,7 @@ function [] = static(color)
         q1 = calculateIK(T_pick_r);
         q1 = [ q1(1:4), -pi/2];
         disp("basic pose")
-        avoid = 1;
+
     end
     q1 = [q1, 20];
    
@@ -109,9 +100,9 @@ function [] = static(color)
     %will make them fall. Hence, made 2 different positions for
     %two stacks of 2 static blocks
     if i<3
-        Tplace = goal_trans + [ zeros(1,3), -15; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];  %location for i< 2 i.e block 1 and 2
+        Tplace = goal_trans + [ zeros(1,3), -15; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
     else
-        Tplace = goal_trans + [ zeros(1,3), +10; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];  %location for static block 3 and 4
+        Tplace = goal_trans + [ zeros(1,3), +10; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
     end
     [qPlace, ~] = calculateIK(Tplace);
     qPlace = [qPlace, -15];

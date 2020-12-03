@@ -1,4 +1,4 @@
-function [Tout, Flag] =  PickedPose(T, pose, base, h)
+function Tout =  PickedPose(T, pose, base, h)
 %%%%%
 % input
 %          T -- the pose of the block, z axis coresponding to white face.
@@ -9,7 +9,7 @@ function [Tout, Flag] =  PickedPose(T, pose, base, h)
 %          Tout--- our desired pose (appropriate pose for robot to pick)
 
 %%%%%
-    Flag = 0;
+
     x0 =  T(1:3, 1);
     y0 = T(1:3, 2);
     z0 = T(1:3, 3);
@@ -32,7 +32,6 @@ function [Tout, Flag] =  PickedPose(T, pose, base, h)
     if minDist < distol
         % In this case, we avoid x axis align with the line between blocks.
         % find closest vec direction to blockVec, which is bad direction.
-        Flag = 1;           %used for White side up
         directions = [x0,y0,z0,-x0,-y0,-z0];  % pick from these 6 directions
         [~,index2] = min(vecnorm(directions - blockVec, 2, 1));
         badvec = directions(:,index2);
