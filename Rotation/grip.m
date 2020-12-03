@@ -19,7 +19,7 @@ for i=1:length(names)
     end
 end
 
-%transform 
+%transform from world to robot frame
 if(strcmp(color,'red'))
     H=[1,0,0,200;
        0,1,0,200;
@@ -33,7 +33,7 @@ elseif(strcmp(color,'blue'))
 end
 closestbox=inf;
  for i=1:length(listname)
-     box=H*pose{listname(i)};
+     box=H'*pose{listname(i)};
      boxposition=box(1:3,4);
      distancevec=boxposition-EndLocation;
      error=norm(distancevec);
@@ -41,6 +41,9 @@ closestbox=inf;
          BoxesInUrFace=name(listname(i));
          speed=norm(twist{listname(i)});
          linvel=twist{listname(i)};
+         linvel=linvel(1:3);
+         linvel(4)=1;
+         linvel=H*linvel;
          linvel=linvel(1:3);
          [Side1,Sidebox] = InUrFace(lynx,color,q(6)/2,0.9,1);
          [Side2,Sidebox] = InUrFace(lynx,color,q(6)/2,0.9,-1);

@@ -22,7 +22,7 @@ EndLocation=RoboPose(1:3,4);
 RoboFinger=RoboPose(1:3,Axis);
 [name,pose,twist]=lynx.get_object_state();
 N=length(pose);
-%transform 
+%transform from robot frame to base frame 
 if(strcmp(color,'red'))
     H=[1,0,0,200;
        0,1,0,200;

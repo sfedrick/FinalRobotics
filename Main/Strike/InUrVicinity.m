@@ -18,8 +18,8 @@ EndLocation=RoboPose(1:3,4);
 N=length(pose);
 %transform 
 if(strcmp(color,'red'))
-    H=[1,0,0,200;
-       0,1,0,200;
+    H=[1,0,0,-200;
+       0,1,0,-200;
        0,0,1,0;
        0,0,0,1];
 elseif(strcmp(color,'blue'))
@@ -34,7 +34,7 @@ BoxesInUrFace=[];
         %perform dot product to determine direction
         %use norm to determine distance from end effector 
         currentbox=pose{i};
-        BoxFrame=H*currentbox;
+        BoxFrame=H'*currentbox;
         BoxLocation=BoxFrame(1:3,4);
         VecToBox=BoxLocation-EndLocation;
         normVecTOBox=norm(VecToBox);
