@@ -55,9 +55,7 @@ function [] = rotationdriver(color,r)
         qold=pos;
    end
    lynx.set_vel([0,0,0,0,0,100])
-   safety=false;
    close=false;
-   firstime=true;
    wait=WithInFace;
    counter=0;
    olddistancevec=[];
@@ -84,12 +82,11 @@ function [] = rotationdriver(color,r)
    end
     if(close)
        lynx.set_vel([0,0,0,0,0,-100]) 
-       
       pause(1); 
       lynx.set_pos([0,0,0,0,0,-15])
        ToleranceMovement(lynx,[0,0,0,0,0,-15],0.1,1000);
        [q,qd]  = lynx.get_state()
-       if(q(6)<-10)
+       if(q(6)<1)
            rotationdriver(color,r)
        end
     else

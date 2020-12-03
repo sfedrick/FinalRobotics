@@ -8,6 +8,8 @@ EndLocation=RoboPose(1:3,4);
 [name,pose,twist]=lynx.get_object_state();
 names=string(names);
 listname=[];
+%find index for a list of name objects passed into grip
+%might be good to break this out into it's own function
 for i=1:length(names)
     for j=1:length(name)
         if(strcmp(name(j),names(i)))
@@ -34,12 +36,13 @@ closestbox=inf;
      box=H*pose{listname(i)};
      boxposition=box(1:3,4);
      display("distance vector")
-     distancevec=boxposition-EndLocation
+     distancevec=boxposition-EndLocation;
      error=norm(distancevec);
      if(error<closestbox)
-         
+         BoxesInUrFace=name(listname(i));
          speed=norm(twist{listname(i)});
          linvel=twist{listname(i)};
+         linvel=linvel(1:3);
          [Side1,Sidebox] = InUrFace(lynx,color,q(6)/2,0.9,1);
          [Side2,Sidebox] = InUrFace(lynx,color,q(6)/2,0.9,-1);
          [vicinity,BoxesInUrV] = InUrVicinity(lynx,color,v);
@@ -54,17 +57,16 @@ closestbox=inf;
                  close=false;
                  wait=true;
                  break
-             elseif(((vicinity && WithInFace)||(vicinity && speed<speedthresh))&& RoboFinger'*linvel<-0.8)
-                      
+             elseif(((vicinity || WithInFace) && RoboFinger'*linvel<0))
                       try
-                      newpos=towardsbox(distancevec(1),distancevec(2),distancevec(3),q);
-                      lynx.set_pos(start);
-                      ToleranceMovement(lynx,newpos,0.1,1000);
-                      close=true;
+                      newpos=towardsbox(boxposition(1),boxposition(2),60,q);
+                      lynx.set_pos(newpos);
+                      ToleranceMovement(lynx,newpos,0.1,1000)
                       catch
                       end
                       wait=true;
-             elseif(RoboFinger'*linvel<0 || vicinity)
+                      lynx.set_vel([0,0,0,0,0,0]);
+             elseif(RoboFinger'*linvel<0)
                  wait=true;
            
              else
