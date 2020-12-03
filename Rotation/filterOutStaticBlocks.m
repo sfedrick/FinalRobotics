@@ -3,9 +3,9 @@ function [dynamicName, dynamicPose, dynamicTwist] = filterOutStaticBlocks(lynx)
 % Gets only the dynamic blocks the environment
 
 % initialize vars
-dynamicName = cell(5,1);
-dynamicPose = cell(5,1);
-dynamicTwist = cell(5,1);
+dynamicName = {};
+dynamicPose = {};
+dynamicTwist = {};
 count = 1; % for which cell to add to 
 
 % get objects from env
@@ -17,7 +17,7 @@ for i=1:length(twist)
     if (currCell(6) ~= 0)
         dynamicName{count} = name{i};
         dynamicPose{count} = pose{i};
-        dynamicTwist{count} = currCell;
+        dynamicTwist{count} = twist{i};
         count = count+1;
     end
 end

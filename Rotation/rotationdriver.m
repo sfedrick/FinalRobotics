@@ -24,6 +24,7 @@ function [] = rotationdriver(color,r)
     
     lynx.set_pos(start);
     ToleranceMovement(lynx,start,0.1,1000);
+    %r = calculateRadiusForEndEff(lynx,color);
   start=findperfect(r,-10);  
     lynx.set_pos(start);
     ToleranceMovement(lynx,start,0.1,1000);
