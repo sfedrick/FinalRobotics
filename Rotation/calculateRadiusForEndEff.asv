@@ -25,9 +25,6 @@ end
 [jointpos, T0e] = calculateFK(lynx.get_state());
 
 for i=1:length(dynamicName)
-    % get each block's linear velocity
-    blockVel = dynamicTwist(1:3);
-    
     % transform each block into end effector frame
     currBlockDirection = Hw0*T0e;
     normCurrBlockDirection = currBlockDirection/norm(currBlockDirection);
