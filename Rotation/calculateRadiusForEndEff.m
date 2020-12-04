@@ -5,6 +5,11 @@ function [r] = calculateRadiusForEndEff(lynx, color)
 % coming towards the end effector and uses it to calculate r
 
 % this is the world y axis that we want to align with most
+safety=-20;
+[start,~]=findperfect(safety,15);
+lynx.set_pos(start);
+ToleranceMovement(lynx,start,0.1,1000);
+
 worldYaxis=[1 0];
 
 % initialize values
@@ -73,14 +78,15 @@ p0e = [jointPos(6,:)';1];
 
 % transform the end effector position from robot frame to world frame
 pwe = Hw0*p0e;
-
+pwe(3)=0;
+pwe(4)=0;
 % then take the norm of it b/c we only want the distance
 normPwe = norm(pwe);
 
 % get the radial distance r that we want the robot to travel
 r = norm(pwe) - maxBlockRadius;
-
-disp('Desired block')
+r=r+safety;
+%disp('Desired block')
 disp(maxBlockVelName);
 
 end

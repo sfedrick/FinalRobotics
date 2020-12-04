@@ -2,8 +2,8 @@ function final(color)
     global lynx % necessary to use ArmController inside a function
     lynx = ArmController(color);
     pause(1);
-q=[0,0,0,0,0,0];
-%q=[-1.2, 0, -0.2,-0.2,0,30];
+q=[ 0  0  0    0   0  0];
+%q=findperfect(-20,15);
 %velq=[-1, 0,-1,0,0,0];
 %q=[0.759188047744899,0.160342666253201,0.630932408401299,-0.791275074654501,-1.570796326794897,30];
 %q=[-0.6340    1.4000   -1.2550    1.5760   -0.4040   -0.4750]; 

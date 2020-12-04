@@ -54,12 +54,14 @@ closestbox=inf;
              %has some problems with obects left and right but not in
              %center of gripper
              if(error<thresh && speed<speedthresh)
+                 disp("thresh broke me out")
                  close=true;
                  wait=false;
                  pause(1);
                  lynx.set_vel([0,0,0,0,0,-100])
                  break
-             elseif(abs(distancevec(1))<((q(6))/2)||abs(distancevec(2))<((q(6))/2)||abs(distancevec(3))<15)
+             elseif(abs(distancevec(1))<((q(6))/2)||abs(distancevec(2))<((q(6))/2)||abs(distancevec(3))<5)
+                 disp("in grip broke me out")
                  close=false;
                  wait=true;
                  break
@@ -67,7 +69,7 @@ closestbox=inf;
                       try
                       newpos=towardsbox(boxposition(1),boxposition(2),60,q);
                       lynx.set_pos(newpos);
-                      ToleranceMovement(lynx,newpos,0.1,1000)
+                      ToleranceMovement(lynx,newpos,0.1,1000);
                       catch
                       end
                       wait=true;

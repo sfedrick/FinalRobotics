@@ -11,27 +11,26 @@ wipe=false;
 %replace tic and toc with ros time
 tic
     while(stillboxes && time<timelimit)
-       display("outside rotation driver")
        time=toc ;
-%         [dynamicName, dynamicPose, dynamicTwist] = filterOutStaticBlocks(lynx);
-%         if(isempty(dynamicName))
-%             stillboxes=false;
-%         else
-%             stillboxes=true;
-%         end
+        [dynamicName, dynamicPose, dynamicTwist] = filterOutStaticBlocks(lynx);
+        if(isempty(dynamicName))
+            stillboxes=false;
+        else
+            stillboxes=true;
+        end
         
-        r=20;
+        
         close=false;
         while(~close)
-%            r = calculateRadiusForEndEff(lynx,color);
+            r = calculateRadiusForEndEff(lynx,color);
             close = rotationdriver(lynx,color,r);
-            display("inside rotation driver")
-            time=toc
+            time=toc;
+          
         end
         if(close)
             %move block to goal table
-          lynx.set_vel([0,0,0,0,0,-100]) 
-          lynx.set_pos([0,0,0,0,0,-15])
+          lynx.set_vel([0,0,0,0,0,-100]);
+          lynx.set_pos([0,0,0,0,0,-15]);
           ToleranceMovement(lynx,[0,0,0,0,0,-15],0.1,1000);
         end
            
