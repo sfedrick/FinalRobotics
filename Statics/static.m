@@ -97,7 +97,7 @@ function [] = static(color)
     
     lynx.command(qGrab);
     grab = 0;
-    pause(1)   
+    pause(.5)   
 
     qpick = [q1(1:5), -15];
     
@@ -108,11 +108,12 @@ function [] = static(color)
     %stacks of more than 2 are risky as any slight movement by robot
     %will make them fall. Hence, made 2 different positions for
     %two stacks of 2 static blocks
-    if i<3
-        Tplace = goal_trans + [ zeros(1,3), -15; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
-    else
-        Tplace = goal_trans + [ zeros(1,3), +10; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
-    end
+%     if i<3
+%         Tplace = goal_trans + [ zeros(1,3), -15; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
+%     else
+%         Tplace = goal_trans + [ zeros(1,3), +10; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
+%     end
+    Tplace = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 140; 0, 0, 0, 1];
     [qPlace, ~] = calculateIK(Tplace);
     qPlace = [qPlace, -15];
     
@@ -120,11 +121,12 @@ function [] = static(color)
     
     % move down to place the block
 %     Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, h -20; zeros(1,4)];
-    if i<3
-        Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, (60 - i*20); zeros(1,4)];
-    else
-        Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, (50 - (i-2)*20) ;zeros(1,4)];
-    end
+%     if i<3
+%         Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, (60 - i*20); zeros(1,4)];
+%     else
+%         Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, (50 - (i-2)*20) ;zeros(1,4)];
+%     end
+    Tdown2 = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 30 + i*20 ; 0, 0, 0, 1];
     qdown2 = calculateIK(Tdown2);
     qdown2 = [qdown2, -15];
     move(qdown2, lynx)
@@ -135,8 +137,11 @@ function [] = static(color)
     %move to qEnd. qEnd acts as an intermediate position so that
     %the robot doesnot hit a block while moving to another block
     %this is done by retracting the robot upwards towards qEnd
-    qEnd = [-1.2, 0, 0.2, 0, qDrop(5:6)];
-    
+%     qEnd = [-1.2, 0, 0.2, 0, qDrop(5:6)];
+    Tend = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 140 ; 0, 0, 0, 1];
+    qEnd = calculateIK(Tend);
+    qEnd = [qEnd, 30];
+    move(qEnd, lynx)
     %lynx.set_vel([1,0,0,0,0,0]);
 %     Tend = Tdown2 + [zeros(2,4); 0, 0, 0, 30; zeros(1,4)];
 %     qEnd = calculateIK(Tend)
@@ -144,7 +149,7 @@ function [] = static(color)
 %         qEnd = [-1.2, 0.2, -0.2, qPlace(4:5)]
 %     end
      %lynx.command(qEnd);
-     move(qEnd, lynx)
+     
      
     disp(" Placed static object ");
 end   
