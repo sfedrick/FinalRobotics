@@ -19,10 +19,10 @@ function [Tout, change] = WhiteSideUp(Tin, pose)
 	y = Tin(1:3,2);
 	y = y/norm(y);
 	z= Tin(1:3, 3);
-	z = z/norm(z)'
+	z = z/norm(z);
 	change = 1;
-	rotate = 0;
-
+	
+    % Trans matrix for rotating end effector by +/- pi/2 around Z axis
 	minusNinety = [ 0, 1, 0, 0;
 			-1, 0, 0, 0;
 			0, 0, 1, 0;
@@ -33,7 +33,7 @@ function [Tout, change] = WhiteSideUp(Tin, pose)
 			0, 0, 1, 0;
 			0, 0, 0, 1];
 
-	if mod(dot(z0, z)) == 1
+	if abs(dot(z0, z)) == 1                                     
 		Tout = Tin;
 		change = 0;
 		return
@@ -41,23 +41,25 @@ function [Tout, change] = WhiteSideUp(Tin, pose)
 
 	product = dot(z0, y);
 
-	if product == 1
+	if product > 0.8
 		Tout = Tin;
 		change = 1;
-	else
+    elseif (product > -0.2) & (product < 0.2)
 		T = Tin * minusNinety;
-		if ( dot(z0, T(1:3, 2)) == 1 )
-			Tout = T;
+        productNew = dot(z0, T(1:3, 2));
+		if ( productNew > 0.8 )
+			Tout = T; change = 1;
 			return
-		elseif ( dot(z0, T(1:3, 2)) == -1 )
-			Tout = Tin * plusNinety;
+		elseif ( productNew < -0.8 )
+			Tout = Tin * plusNinety; change = 1;
 			return
-		end
-	
-	elseif product  == -1
+        end
+            
+    end
+	if product  < -0.8
 		change = 2;
 		%%%This is where the block would take TWO steps
-        %%% This will take a lot of time, we can just ignore this part
+        %%% This will add a lot of time, we can just ignore this part
         Tout = Tin;
 	end
 

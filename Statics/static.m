@@ -59,9 +59,13 @@ function [] = static(color)
     poses = getpose(static.name, poselist, namelist);
     base = inv(Trg) * [0;0;0;1] ;
     base = base(1:3);
-    T_pick_g = PickedPose(poses{i}, poses, base, h); %desired picked pose in ground frame
+    [T_pick_g, Flag] = PickedPose(poses{i}, poses, base, h); %desired picked pose in ground frame
 
     T_pick_r = Trg * T_pick_g  ;           %desired picked pose in robot frame                
+%     if Flag == 0 
+%         [T_pick_r, change] = WhiteSideUp(T_pick_r, (Trg * static.pose{i}));
+%     end
+    
     q1 = calculateIK(T_pick_r);
     if isempty(q1)
         T_pick_g = Trg * static.pose{i};
