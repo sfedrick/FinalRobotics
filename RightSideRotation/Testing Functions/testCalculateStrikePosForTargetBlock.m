@@ -24,7 +24,7 @@ if (testNum == 2)
     
     [dynName, dynPose, dynColor] = filterOutStaticBlocks();
     
-    [T0e] = calculateStrikePosForTargetBlock(dynName, dynPose, color);
+    [T0e] = calculateStrikePosForTargetBlock(dynName, dynPose, color)
 
     if (isnan(T0e))
         disp('Failed');

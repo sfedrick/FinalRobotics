@@ -1,4 +1,4 @@
-function [T0e] = calculateStrikePosForTargetBlock(dynBlockNames, dynBlockPoses, color)
+function [T0e, targetBlockName] = calculateStrikePosForTargetBlock(dynBlockNames, dynBlockPoses, color)
 %CALCULATESTRIKEPOSFORTARGETBLOCK 
 % Calculates the x,y coordinates of the striking position for the end
 % effector. 
@@ -6,6 +6,7 @@ function [T0e] = calculateStrikePosForTargetBlock(dynBlockNames, dynBlockPoses, 
 % Strategy: 
 % 1. Find target block
 % 2. Calculate radius from the center of turnstile to the target block
+% 3. 
 
 % Radial vector in world frame. A point on this line is calculated based on
 % the radiusFromCenter, which is then used to set the XY coordinate of the
@@ -21,7 +22,7 @@ if (strcmp('red',color))
 end
 
 % Find target block
-[targetBlockIdx] = calculateTargetBlock(dynBlockNames, dynBlockPoses, color);
+[targetBlockIdx, targetBlockName] = calculateTargetBlock(dynBlockNames, dynBlockPoses, color);
 
 % Only proceed if target block idx is not nan. If it is, then that means
 % there is no block in our target region of the turnstile
@@ -61,6 +62,7 @@ if (~isnan(targetBlockIdx))
     return;
 end
 
+% If there is no target block, then output NaN
 T0e = NaN;
 
 end

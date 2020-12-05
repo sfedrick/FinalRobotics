@@ -1,4 +1,4 @@
-function [targetBlockIdx] = calculateTargetBlock(dynBlockNames, dynBlockPoses, color)
+function [targetBlockIdx, targetBlockName] = calculateTargetBlock(dynBlockNames, dynBlockPoses, color)
 %CALCULATETARGETBLOCK 
 % Finds the block closest to the right hand side of the bottom-left
 % quadrant of the rotating table by angle
@@ -32,15 +32,8 @@ for i=1:length(dynBlockNames)
     % but if red robot, then only look at blocks w/ -x and -y pose values
     if ((strcmp(color,'blue') && blockXYCoords(1) > 0 && blockXYCoords(2) > 0) || (strcmp(color,'red') && blockXYCoords(1) < 0 && blockXYCoords(2) < 0))
         
-        
-        % calculate angle between block and cutoff vector in degrees
-        newMinAngle = acos((quadrantLimit*blockXYCoords)/(norm(blockXYCoords)*norm(quadrantLimit)))*180/pi;
-        
-        % want the smaller of the two angles, so subtract 90 if greater
-        % than 90 b/c acos has 2 solns
-        if (newMinAngle > 90)
-            newMinAngle = newMinAngle - 90;
-        end
+        % gets the angle from the block position vector to the 
+        newMinAngle = calcSmallerAngleBwTwoVectors(quadrantLimit, blockXYCoords);
         disp(newMinAngle)
         
         % if this is the smallest angle so far, then this is the block we

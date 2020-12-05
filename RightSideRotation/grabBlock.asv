@@ -1,0 +1,43 @@
+function [successfullyGrabbed] = grabBlock(endEffStrikeLine, desiredBlockName, endEffStrikePose, color)
+%GRABBLOCK 
+% Given a desired rotating block, grab it
+
+global lynx;
+
+[endEffStrikeConfig isPos] = calculateIKs(endEffStrikePose);
+
+% first move to the end effector strike pose
+move([endEffStrikeConfig, 30], lynx);
+
+% this is the angle from the end effector's strike "line" that we want the
+% block to be at before we tell the end effector to go down and grab the
+% block. initialize to Inf
+angleFromEndEff = Inf;
+
+% the index of the desired block out of all the blocks. need to do this b/c
+% we don't want to filter out the dynamic blocks each time we poll
+[name, pose, twist] = lynx.get_object_state();
+desiredBlockIdx = getIndexOfBlockForName(name, desiredBlockName);
+
+% once here, wait until the block is 15 degrees from the robot
+while(angleFromEndEff > 15)
+    
+    % keep polling the block's position
+    [name, pose, twist] = lynx.get_object_state();
+    
+    % get the desired block's current XY coord vector
+    desiredBlockXYCoord = pose{desiredBlockIdx}(1:2,4);
+    
+    % get current angle between desired block and end effector strike line
+    angleFromEndEff = calcSmallerAngleBwTwoVectors(desiredBlockXYCoord,endEffStrikeLine);
+    pause(0.1);
+end
+
+% once block is 15 degrees from robot, then move down by 20 in height
+endEffStrikePose(3,4) = endEffStrikePose(3,4) - 20;
+
+% get the new lowered config
+[endEffLoweredConfig isPos] = c
+
+end
+
