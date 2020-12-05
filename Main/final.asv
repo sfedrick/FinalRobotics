@@ -1,8 +1,8 @@
 function final(color)
-    global lynx % necessary to use ArmController inside a function
-    lynx = ArmController(color);
-    pause(1);
-q=[ 0  0  0    0   0  30];
+%     global lynx % necessary to use ArmController inside a function
+%     lynx = ArmController(color);
+%     pause(1);
+q=[ 0  0  0    0   0  100];
 %q=findperfect(-20,15);
 %velq=[-1, 0,-1,0,0,0];
 %q=[0.759188047744899,0.160342666253201,0.630932408401299,-0.791275074654501,-1.570796326794897,30];
@@ -14,7 +14,7 @@ q=[ 0  0  0    0   0  30];
 
  
  %lynx.set_vel([0,-10,-10,0,0,0]);
- JerkMove(lynx,color,q,0.2,5,0.1,10);
+ JerkMove(lynx,color,q,0.2,3,0.1,10);
 
 [q,qd]  = lynx.get_state();
 % % %   get state of your opponent's robot 

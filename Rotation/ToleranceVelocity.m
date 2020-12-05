@@ -1,10 +1,14 @@
-function [breakme] = ToleranceVelocity(lynx,desiredpos,error,base)
+function [breakme] = ToleranceVelocity(lynx,color,desiredpos,error,base,timelimit)
      
         reached_target = false;
         i=0;
         
         breakme=false;
-        while ~reached_target
+        
+        t0=RossyTime();
+        time=0;
+        while (~reached_target && time<timelimit)
+            time=RossyTime()-t0; 
             i=i+1;
             base=base-i;
             % Check if robot is collided then wait
@@ -23,11 +27,19 @@ function [breakme] = ToleranceVelocity(lynx,desiredpos,error,base)
             elseif(posDiff<(error+(1/base)))
                 reached_target = true;
             elseif(base<0)
-             breakme=true;
              reached_target = true;
             end
-            pause(0.1)
+            pause(0.1);
+            
+            [lucky,luckyboxes] = InUrFace(lynx,color,20,0.9,3,0,0);
+            if(lucky)
+                breakme=true;
+                break;
+            end
             % End of student code
         end
+    if(time>timelimit)
+       breakme=true;
+   end
 end
 
