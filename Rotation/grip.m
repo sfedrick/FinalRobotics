@@ -52,6 +52,9 @@ target="";
           %lynx.set_pos(qnew);
           %close=ToleranceMovement(lynx,color,qnew,0.1,1);
 %            JerkMove(lynx,color,qnew,0.2,1,0.1,3)
+            disp("I'm walking here");
+            disp(distanceError)
+            disp(closestbox)
             lynx.command(qnew);
             close=ToleranceMovement(lynx,color,qnew,0.3,2,1);
       end

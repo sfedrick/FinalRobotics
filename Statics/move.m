@@ -13,7 +13,7 @@ function move(qfinal, lynx)
         if count>30
             break;
         end
-        disp("reaching")
+%         disp("reaching")
 %         reachNorm = norm(q(1:5)-qfinal(1:5));
         reachNorm = norm(q - qfinal);
         if reachNorm < 0.1
