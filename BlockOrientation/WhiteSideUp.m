@@ -27,13 +27,13 @@ function [Tout, change] = WhiteSideUp(Tin, pose)
 			-1, 0, 0, 0;
 			0, 0, 1, 0;
 			0, 0, 0, 1];
+    % pi/2 = 1.57; but joint 5 is limited to +1.5 -->
+	plusNinety = [ cos(1.5), -sin(1.5), 0, 0;
+                   sin(1.5), cos(1.5), 0, 0;
+                   0, 0, 1, 0;
+                   0, 0, 0, 1];
 
-	plusNinety = [ 0, -1, 0, 0;
-			1, 0, 0, 0;
-			0, 0, 1, 0;
-			0, 0, 0, 1];
-
-	if abs(dot(z0, z)) == 1                                     
+	if abs(dot(z0, z)) > 0.8                                     
 		Tout = Tin;
 		change = 0;
 		return

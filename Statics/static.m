@@ -62,9 +62,9 @@ function [] = static(color)
     [T_pick_g, Flag] = PickedPose(poses{i}, poses, base, h); %desired picked pose in ground frame
 
     T_pick_r = Trg * T_pick_g  ;           %desired picked pose in robot frame                
-%     if Flag == 0 
-%         [T_pick_r, change] = WhiteSideUp(T_pick_r, (Trg * static.pose{i}));
-%     end
+    if Flag == 0 
+        [T_pick_r, change] = WhiteSideUp(T_pick_r, (Trg * static.pose{i}));
+    end
     
     q1 = calculateIK(T_pick_r);
     if isempty(q1)
@@ -80,8 +80,8 @@ function [] = static(color)
     move(q1, lynx)
 
     
-    T_down_g = T_pick_g - [zeros(3), [0;0;35];0 0 0 0];
-    T_down_r = Trg * T_down_g  ;           %desired picked pose in robot frame                
+%%%%    T_down_g = T_pick_g - [zeros(3), [0;0;35];0 0 0 0];
+    T_down_r = T_pick_r - [zeros(3), [0;0;35];0 0 0 0] ;           %desired picked pose in robot frame                
     qdown = calculateIK(T_down_r);
     
     if isempty(qdown)
@@ -112,25 +112,25 @@ function [] = static(color)
     %stacks of more than 2 are risky as any slight movement by robot
     %will make them fall. Hence, made 2 different positions for
     %two stacks of 2 static blocks
-%     if i<3
-%         Tplace = goal_trans + [ zeros(1,3), -15; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
-%     else
-%         Tplace = goal_trans + [ zeros(1,3), +10; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
-%     end
-    Tplace = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 140; 0, 0, 0, 1];
+    
+    if change == 0
+        Tplace = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 140; 0, 0, 0, 1];
+    else
+        Tplace = [1, 0, 0, 70; 0, 0, -1, -270; 0, 1, 0, 140; 0, 0, 0, 1];
+    end
     [qPlace, ~] = calculateIK(Tplace);
     qPlace = [qPlace, -15];
     
     move(qPlace, lynx)
     
     % move down to place the block
-%     Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, h -20; zeros(1,4)];
-%     if i<3
-%         Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, (60 - i*20); zeros(1,4)];
-%     else
-%         Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, (50 - (i-2)*20) ;zeros(1,4)];
-%     end
-    Tdown2 = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 30 + i*20 ; 0, 0, 0, 1];
+
+    if change == 0
+       Tdown2 = [0, -1, 0, 75; -1, 0, 0, -270; 0, 0, -1, 30 + i*20 ; 0, 0, 0, 1]; 
+    else
+        Tdown2 = [1, 0, 0, 70; 0, 0, -1, -270; 0, 1, 0, (30 + (i*20)); 0, 0, 0, 1];
+    end
+    %
     qdown2 = calculateIK(Tdown2);
     qdown2 = [qdown2, -15];
     move(qdown2, lynx)
@@ -142,7 +142,8 @@ function [] = static(color)
     %the robot doesnot hit a block while moving to another block
     %this is done by retracting the robot upwards towards qEnd
 %     qEnd = [-1.2, 0, 0.2, 0, qDrop(5:6)];
-    Tend = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 140 ; 0, 0, 0, 1];
+    Tend = Tdown2 + [zeros(2,4); 0, 0, 0, 60; zeros(1,4)];
+    %Tend = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 140 ; 0, 0, 0, 1];
     qEnd = calculateIK(Tend);
     qEnd = [qEnd, 30];
     move(qEnd, lynx)
