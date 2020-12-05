@@ -5,15 +5,13 @@ function [r] = calculateRadiusForEndEff(lynx, color)
 % coming towards the end effector and uses it to calculate r
 
 % this is the world y axis that we want to align with most
-safety=-20;
-[start,~]=findperfect(safety,15);
-lynx.set_pos(start);
-ToleranceMovement(lynx,start,0.1,1000);
-
+ safety=-15;
+%JerkMove(lynx,start,0.1,2,0.1,5)
 worldYaxis=[1 0];
 
 % initialize values
-maxDotVal = 0;
+directionlimit=0;
+maxDotVal = directionlimit;
 maxBlockVelName = '';
 maxBlockRadius = 0;
 Hw0=[];
@@ -23,8 +21,8 @@ linVelTolerance = 0.1;
 
 % set Hw0 depending on color of the robot
 if(strcmp(color,'red'))
-    Hw0=[1,0,0,200;
-       0,1,0,200;
+    Hw0=[1,0,0,-200;
+       0,1,0,-200;
        0,0,1,0;
        0,0,0,1];
 elseif(strcmp(color,'blue'))
@@ -36,7 +34,6 @@ end
 
 [dynamicName, dynamicPose, dynamicTwist] = filterOutStaticBlocks(lynx);
 
-disp(dynamicTwist);
 for i=1:length(dynamicName)
     % get each block's x & y linear velocities in the world's frame
     blockVel = dynamicTwist(i);
@@ -84,10 +81,16 @@ pwe(4)=0;
 normPwe = norm(pwe);
 
 % get the radial distance r that we want the robot to travel
-r = norm(pwe) - maxBlockRadius;
-r=r+safety;
+%r = norm(pwe) - maxBlockRadius;
+% r=r+safety;
+r=85-maxBlockRadius;
+if(r<0)
+    r=0;
+end
 %disp('Desired block')
-disp(maxBlockVelName);
 
+if(maxDotVal<=directionlimit)
+    r=nan;
+end
 end
 

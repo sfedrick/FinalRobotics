@@ -4,34 +4,47 @@ function [wipe] = makeRotations(color)
 global lynx;
 lynx = ArmController(color);
 pause(1);
+t0=RossyTime();
 time=0;
-timelimit=20/0.2;
+timelimit=20;
+LocalLimit=10;
 stillboxes=true;
 wipe=false;
-%replace tic and toc with ros time
-tic
     while(stillboxes && time<timelimit)
-       time=toc ;
+       time=RossyTime()-t0; 
+      
         [dynamicName, dynamicPose, dynamicTwist] = filterOutStaticBlocks(lynx);
         if(isempty(dynamicName))
             stillboxes=false;
         else
             stillboxes=true;
         end
-        
-        
+        %localtime kicks you out of while loop if you're taking too long
+        tl=RossyTime();
+        localTime=0;
         close=false;
-        while(~close)
+        while(~close && localTime<LocalLimit )
+            localTime=RossyTime()-tl; 
+            safety=-15;
+            [start,~]=findperfect(safety,15);
+            JerkMove(lynx,color,start,0.3,1,0.1,5);
             r = calculateRadiusForEndEff(lynx,color);
-            close = rotationdriver(lynx,color,r);
-            time=toc;
+            if(~isnan(r))
+                close = rotationdriver(lynx,color,r);
+            else
+                rosPause(1);
+                %do reverse rotation driver
+            end
+            
           
         end
         if(close)
             %move block to goal table
           lynx.set_vel([0,0,0,0,0,-100]);
-          lynx.set_pos([0,0,0,0,0,-15]);
-          ToleranceMovement(lynx,[0,0,0,0,0,-15],0.1,1000);
+          q=[0,0,0,0,0,-5];
+          lynx.set_pos(q);
+          ToleranceMovement(lynx,color,q,0.1,5,0)
+          
         end
            
     end

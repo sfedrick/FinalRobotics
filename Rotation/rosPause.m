@@ -1,11 +1,12 @@
-function [time] = rosPause(timelimit)
+
+function [currentTime] = rosPause(timelimit)
 %does a pause in rostime in seconds
-    timelimit=timelimit*10^9;
-    to=rostime("now");
-    time=0;
-    while(abs(time)<timelimit && time>=0)
-        currentTime=rostime("now");
-        time=to.Nsec()-currentTime.Nsec();
+
+    to=RossyTime();
+    currentTime=RossyTime()-to;
+    while(currentTime<timelimit)
+        currentTime=RossyTime()-to;
+        pause(0.01);
     end
 end
 
