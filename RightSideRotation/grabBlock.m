@@ -19,7 +19,7 @@ angleFromEndEff = Inf;
 [name, pose, twist] = lynx.get_object_state();
 desiredBlockIdx = getIndexOfBlockForName(name, desiredBlockName);
 
-% once here, wait until the block is 15 degrees from the robot
+% once here, wait until the block is 30 degrees from the robot
 while(angleFromEndEff > 30)
     
     % keep polling the block's position
@@ -33,7 +33,7 @@ while(angleFromEndEff > 30)
     pause(0.2);
 end
 
-% once block is 15 degrees from robot, then move down by 20 in height
+% once block is 30 degrees from robot, then move down by 20 in height
 endEffStrikePose(3,4) = endEffStrikePose(3,4) - 20;
 
 % calculate the new lowered config q
@@ -54,6 +54,8 @@ disp('closing');
 [pos, vel] = lynx.get_state();
 if (pos(6) > 0)
     successfullyGrabbed = true;
+else
+    successfullyGrabbed = false;
 end
 
 end

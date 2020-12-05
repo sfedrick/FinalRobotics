@@ -3,11 +3,6 @@ function [T0e, targetBlockName] = calculateStrikePosForTargetBlock(dynBlockNames
 % Calculates the x,y coordinates of the striking position for the end
 % effector. 
 
-% Strategy: 
-% 1. Find target block
-% 2. Calculate radius from the center of turnstile to the target block
-% 3. 
-
 % Radial vector in world frame. A point on this line is calculated based on
 % the radiusFromCenter, which is then used to set the XY coordinate of the
 % striking pose in the robot's frame
