@@ -26,6 +26,4 @@ toc
 % % %   get state of your opponent's robot 
 %[q,qd]  = lynx.get_opponent_state()
 
-
-
 end

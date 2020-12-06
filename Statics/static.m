@@ -52,7 +52,7 @@ function [] = static(color)
         static.pose{i,1} = pose{priority(i,:)};
     end
 
- for i=1:4
+ for i=3:3
 
     % update the position of the block in every loop.
     [namelist,poselist,~] = lynx.get_object_state();
@@ -115,8 +115,11 @@ function [] = static(color)
     
     if change == 0
         Tplace = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 140; 0, 0, 0, 1];
-    else
+    elseif change == 1
         Tplace = [1, 0, 0, 70; 0, 0, -1, -270; 0, 1, 0, 140; 0, 0, 0, 1];
+    else
+        %Tplace = [ -1, 0, 0, 70; 0, 0, -1, -270; 0, -1, 0, 140; 0, 0, 0, 1];
+        Tplace = [0, -0.9680, 0.2510, 70; 0, -0.2510, -0.9680, -270; 1, 0, 0, 140; 0, 0, 0, 1];
     end
     [qPlace, ~] = calculateIK(Tplace);
     qPlace = [qPlace, -15];
@@ -127,8 +130,11 @@ function [] = static(color)
 
     if change == 0
        Tdown2 = [0, -1, 0, 75; -1, 0, 0, -270; 0, 0, -1, 30 + i*20 ; 0, 0, 0, 1]; 
-    else
+    elseif change == 1
         Tdown2 = [1, 0, 0, 70; 0, 0, -1, -270; 0, 1, 0, (30 + (i*20)); 0, 0, 0, 1];
+    else
+        %Tdown2 = [ 1, 0, 0, 70; 0, 0, -1, -270; 0, 1, 0, (30 + (i*20)); 0, 0, 0, 1] * [ cos(1.5), -sin(1.5), 0, 0; sin(1.5), cos(1.5), 0, 0; 0, 0, 0, 1; 0, 0, 0, 1];
+        Tdown2 = [0, -1, 0, 75; -1, 0, 0, -270; 0, 0, -1, 30 + i*20 ; 0, 0, 0, 1] * [ cos(1.5), -sin(1.5), 0, 0; sin(1.5), cos(1.5), 0, 0; 0, 0, 0, 1; 0, 0, 0, 1];
     end
     %
     qdown2 = calculateIK(Tdown2);
@@ -140,25 +146,16 @@ function [] = static(color)
     
     %move to qEnd. qEnd acts as an intermediate position so that
     %the robot doesnot hit a block while moving to another block
-    %this is done by retracting the robot upwards towards qEnd
-%     qEnd = [-1.2, 0, 0.2, 0, qDrop(5:6)];
+  
     Tend = Tdown2 + [zeros(2,4); 0, 0, 0, 60; zeros(1,4)];
     %Tend = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 140 ; 0, 0, 0, 1];
     qEnd = calculateIK(Tend);
     qEnd = [qEnd, 30];
     move(qEnd, lynx)
-    %lynx.set_vel([1,0,0,0,0,0]);
-%     Tend = Tdown2 + [zeros(2,4); 0, 0, 0, 30; zeros(1,4)];
-%     qEnd = calculateIK(Tend)
-%     if isempty(qEnd)
-%         qEnd = [-1.2, 0.2, -0.2, qPlace(4:5)]
-%     end
-     %lynx.command(qEnd);
      
      
     disp(" Placed static object ");
 end   
-toc
- % %   get state of your opponent's robot
- %   [q,qd]  = lynx.get_opponent_state()
+
+
 end
