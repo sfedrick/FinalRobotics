@@ -2,7 +2,7 @@ function [jointvel,configs] = MoveInCircle(Dradius,speed,N,q0,plot)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
 % initialize time linespace discretization
-t = linspace(0,pi,N);
+t = linspace(0,pi/4,N);
 dt = t(2) - t(1);
 %distance from cednter of table in striking pose
 r0=100;
@@ -43,7 +43,7 @@ for i=1:length(v)
     configs(i+1,:)=q;
     if(plot)
         [jointPos,T] = calculateFK(q);
-
+        
         % Use FKV to get the corresponding linear velocities up until jointDesired
         [pv,pq] = fkeval(qd,q,dt);
 

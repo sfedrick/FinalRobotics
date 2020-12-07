@@ -1,4 +1,4 @@
-function [r] = calculateRadiusForEndEff(lynx, color)
+function [r] = calculateRadiusForEndEff(lynx, color,axis,directionlimit)
 %CALCULATERADIUS 
 % Calculates the radius r that the end effector needs to travel based on
 % the given blocks. Finds the block with the greatest linear velocity
@@ -7,10 +7,10 @@ function [r] = calculateRadiusForEndEff(lynx, color)
 % this is the world y axis that we want to align with most
  safety=-15;
 %JerkMove(lynx,start,0.1,2,0.1,5)
-worldYaxis=[1 0];
+worldYaxis=axis;
 
 % initialize values
-directionlimit=0;
+
 maxDotVal = directionlimit;
 maxBlockVelName = '';
 maxBlockRadius = 0;
@@ -83,9 +83,9 @@ normPwe = norm(pwe);
 % get the radial distance r that we want the robot to travel
 %r = norm(pwe) - maxBlockRadius;
 % r=r+safety;
-r=85-maxBlockRadius;
+r=90-maxBlockRadius;
 if(r<0)
-    r=0;
+    r=5;
 end
 %disp('Desired block')
 

@@ -1,4 +1,4 @@
-function [WithInFace,BoxesInUrFace] = InUrFace(lynx,color,Range,Direction,Axis,DetectLinVel,ignorez)
+function [WithInFace,BoxesInUrFace] = InUrFaceNoSafe(lynx,color,Range,Direction,Axis,DetectLinVel,ignorez,safefactor)
 % This function alerts you when the robot has a box in its face
 %lynx is the lynx variable from lynx=ArmController(color)
 %color is a character string
@@ -27,7 +27,7 @@ safety=RoboFinger/norm(RoboFinger);
 if(ignorez)
 safety(3)=0;
 end
-EndLocation=EndLocation-safety*5;
+EndLocation=EndLocation-safety*safefactor;
 [name,pose,twist]=filterOutStaticBlocks(lynx);
 N=length(name);
 %transform from robot frame to base frame 

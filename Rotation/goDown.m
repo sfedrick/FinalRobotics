@@ -7,7 +7,7 @@ function [q,isPos] = goDown(q,h)
 %[1.1000    0.1670    0.7030   -0.8680 -pi/2 30]
 
    [jointPositions,T0i] = calculateFK(q);
-    T0i(3,4)=T0i(3,4)+h;
+    T0i(3,4)=h;
     [q,isPos] = calculateIK(T0i);
     %q(5)=-pi/2;
     q(6)=30;

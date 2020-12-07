@@ -23,12 +23,18 @@ wipe=false;
         tl=RossyTime();
         localTime=0;
         close=false;
-        while(~close && localTime<LocalLimit )
+        while(~close && localTime<LocalLimit && stillboxes)
+            [dynamicName, dynamicPose, dynamicTwist] = filterOutStaticBlocks(lynx);
+            if(isempty(dynamicName))
+                stillboxes=false;
+            else
+                stillboxes=true;
+            end
             localTime=RossyTime()-tl; 
             safety=-15;
             [start,~]=findperfect(safety,15);
             JerkMove(lynx,color,start,0.3,1,0.1,5);
-            r = calculateRadiusForEndEff(lynx,color);
+            r = calculateRadiusForEndEff(lynx,color,[ 1,0],0.5);
             if(~isnan(r))
                 close = rotationdriver(lynx,color,r);
             else
