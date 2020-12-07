@@ -204,9 +204,11 @@ b=endaxis_z;
 p=round(atan2(norm(cross(a,b)), dot(a,b)),2);
 
 if abs(p) ~= round((pi/2),2)
-    isPos = 0;    disp('isPos = False');
+    isPos = 0;  
+%     disp('isPos = False');
 else
-    isPos = 1;    disp('isPos = True');
+    isPos = 1;    
+%     disp('isPos = True');
 end
 
 end

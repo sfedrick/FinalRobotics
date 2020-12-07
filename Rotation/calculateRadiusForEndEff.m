@@ -1,4 +1,4 @@
-function [r] = calculateRadiusForEndEff(lynx, color,axis)
+function [r] = calculateRadiusForEndEff(lynx, color,axis,directionlimit)
 %CALCULATERADIUS 
 % Calculates the radius r that the end effector needs to travel based on
 % the given blocks. Finds the block with the greatest linear velocity
@@ -10,7 +10,7 @@ function [r] = calculateRadiusForEndEff(lynx, color,axis)
 worldYaxis=axis;
 
 % initialize values
-directionlimit=0.5;
+
 maxDotVal = directionlimit;
 maxBlockVelName = '';
 maxBlockRadius = 0;

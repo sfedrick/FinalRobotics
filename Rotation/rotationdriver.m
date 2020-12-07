@@ -1,15 +1,33 @@
 function [close] = rotationdriver(lynx,color,r)
-    %% Simulation Parameters
+%% This is the main rotation driver function that works by drawing a circle around the table 
+% it works by walking around a table based on a given radius from the
+% calculateRadiusForEndEff(lynx, color,axis) function
+%it just needs r from this function and the lynx and color function
+%it walks along the circle and once an obstacle is in its face it moves the
+%end effector towards the block 
 
-%start = [.9, 0, 1, -1, -pi/2,30];
-%start=[0.75, 0.1, 0.9, -1, -pi/2,30];
-%start=[0.75, 0.1, 0.7, -0.8, -pi/2,30
-%r = calculateRadiusForEndEff(lynx,color);
-pause(0.1);
-[start,~]=findperfect(r,-5) ; 
-move(start,lynx);
-[closeup,~] = InUrFace(lynx,color,25,0,3,0,1);
 
+%these are key parameters for the function
+
+%this determines how far a block has to be from the robot in order for us 
+% to force movement towards the block
+%
+    movebuffer=10;
+    ramp=0.1;
+    dramp=0.05;
+    range=60;
+    direction=0.8;
+    leftrightRange=10;
+    
+[q, ~] = lynx.get_state();
+ [q,~] = goDown(q,60);
+ lynx.set_pos(q);
+ ToleranceMovement(lynx,color,q,0.1,1,0)
+ [start,~]=findperfect(r,-10) ; 
+lynx.set_pos(start);
+ToleranceMovement(lynx,color,start,0.1,3,0)
+[closeup,~] = InUrFace(lynx,color,20,0,3,0,0);
+[below,blockingboxes] = InUrFace(lynx,color,30,0.8,2,0,0);
 % ToleranceMovement(lynx,color,start,0.1,3,1);
 close=false;
 [q,~]  = lynx.get_state();    
@@ -24,15 +42,15 @@ elseif(closeup)
      disp("something was below me and in my face");
     close=true;
     blockingpath=true;
+elseif(below)
+     [~,distancevec,originaltarget]=grip(lynx,color,blockingboxes,range+movebuffer);
 else
     blockingpath=false;
 end
 
-[jointvel,configs] = MoveInCircle(r,1,100,q,0);
+[jointvel,configs] = MoveInCircle(r,1,50,q,0);
 qold=q;
 L=length(jointvel(:,1));
-range=50;
-direction=0.8;
 if(~blockingpath)
        for target_index = 1:L
 
@@ -56,7 +74,10 @@ if(~blockingpath)
            
            
            [WithInFace,BoxesInUrFace] = InUrFace(lynx,color,range,direction,3,1,1);
-            [lucky,luckyboxes] = InUrFace(lynx,color,30,0.5,3,0,1);
+           [left,~] = InUrFace(lynx,color,leftrightRange,0.5,1,1,1);
+           [right,~] = InUrFace(lynx,color,leftrightRange,0.5,-1,1,1);
+           
+            [lucky,luckyboxes] = InUrFace(lynx,color,20,0.5,3,0,0);
             %[sanity,~] = InUrFace(lynx,color,90,0,3);
             [Stop] = QuarterGrab(q,qold,0.01);
             if(WithInFace)
@@ -64,13 +85,12 @@ if(~blockingpath)
                 lynx.set_vel([0,0,0,0,0,100]);
                 close=false;
                 break;
-            end
-%             if(Stop)
+%             elseif(~left && ~right)
+%                  disp("a block was to the left or right of me")
 %                 lynx.set_vel([0,0,0,0,0,100]);
-%                 close=true;
-%                  break;
-%             end
-            if(lucky)
+%                 close=false;
+%                 break;
+            elseif(lucky)
                 lynx.set_vel([0,0,0,0,0,100]);
                 disp("I got lucky");
                 close=true;
@@ -91,12 +111,9 @@ disp("finished")
        end
        counter=0;
        
-       movebuffer=10;
-       ramp=1;
-       dramp=0.1;
+        direction=0.1;
        firsttime=true;
        [~,distancevec,originaltarget]=grip(lynx,color,BoxesInUrFace,100);
-       range=norm(distancevec);
        while(~close &&  wait)
             lynx.set_vel([0,0,0,0,0,100]);
            counter=counter+1;
@@ -110,24 +127,27 @@ disp("finished")
     %        end
 
             range=range-ramp;
-            direction=direction-dramp;
+            direction=abs(direction-dramp);
+           
            [q,~]=lynx.get_state();
          [~,RoboPose] = calculateFK(q);
            EndLocation=RoboPose(1:3,4);
 
            if(EndLocation(3)>70)
-               [q,isPos] = goDown(q,-10);
+               [q,~] = goDown(q,60);
                lynx.set_pos(q);
            end
 
            [WithInFace,BoxesInUrFace] = InUrFace(lynx,color,range,direction,3,0,1);
            [velocityFace,velFaces] = InUrFace(lynx,color,range,direction,3,1,1);
-           [left,~] = InUrFace(lynx,color,20,0.8,3,1,1);
-           [right,~] = InUrFace(lynx,color,20,0.8,-3,1,1);
-          [~,distancevec,newtarget]=grip(lynx,color,BoxesInUrFace,range-movebuffer);
-          %range=norm(distancevec); figure out how to implement this 
-          [closeup,~] = InUrFace(lynx,color,25,0,3,0,1);
-          if(range<30|| closeup)
+           [left,~] = InUrFaceNoSafe(lynx,color,leftrightRange,0.9,1,1,1,0);
+           [right,~] = InUrFaceNoSafe(lynx,color,leftrightRange,0.9,-1,1,1,0);
+          [~,distancevec,newtarget]=grip(lynx,color,BoxesInUrFace,inf);
+%           if(norm(distancevec)~=inf)
+%             range=norm(distancevec)+movebuffer; 
+%           end
+          [closeup,~] = InUrFace(lynx,color,15,0,3,0,1);
+          if(range<25|| closeup)
               disp("counter broke me out")
               disp(range)
               disp(direction)
@@ -141,8 +161,8 @@ disp("finished")
            elseif(WithInFace && ~strcmp(originaltarget,newtarget) && velocityFace)
              [~,distancevec,originaltarget]=grip(lynx,color,velFaces,range);
            elseif(WithInFace && ~strcmp(originaltarget,newtarget))
-               [~,distancevec,originaltarget]=grip(lynx,color,BoxesInUrFace,range-movebuffer);
-          elif(~WithInFace)
+               [~,distancevec,originaltarget]=grip(lynx,color,BoxesInUrFace,range+movebuffer);
+          elseif(~WithInFace && strcmp("",newtarget))
               disp("Nothing happend so I broke out");
               disp(range)
               disp(direction)
@@ -153,21 +173,19 @@ disp("finished")
          rosPause(0.1);
        end
 
-        [ender,dq]= lynx.get_state();
-        dender(6)=-5;
-        ender(6)=-5; 
-        lynx.set_pos(ender);
-        lynx.set_vel(dender);
-        rosPause(0.5);
-       disp("result");
-
         
+end
+
+        [ender,~]= lynx.get_state();
+        ender(6)=-5; 
+         %lynx.set_vel([0,0,0,0,0,-5]);
+        lynx.set_pos(ender);
+        rosPause(0.5);
         [pos, ~] = lynx.get_state(); 
         if(pos(6)<2)
             close=false;
         else
-             close=true;
+            close=true;
         end
-end
     
 end

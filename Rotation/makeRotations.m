@@ -34,7 +34,7 @@ wipe=false;
             safety=-15;
             [start,~]=findperfect(safety,15);
             JerkMove(lynx,color,start,0.3,1,0.1,5);
-            r = calculateRadiusForEndEff(lynx,color,[1,0]);
+            r = calculateRadiusForEndEff(lynx,color,[ 1,0],0.5);
             if(~isnan(r))
                 close = rotationdriver(lynx,color,r);
             else

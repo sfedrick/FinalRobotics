@@ -9,6 +9,7 @@ names=string(names);
 listname=[];
 %find index for a list of name objects passed into grip
 %might be good to break this out into it's own function
+
 for i=1:length(names)
     for j=1:length(name)
         if(strcmp(name(j),names(i)))
@@ -45,7 +46,7 @@ target="";
              distance=distancevec;
      end
  end
-  if( closestbox<distanceError)    
+  if( closestbox>distanceError)    
       try
       [qnew,isPos]=towardsbox(boxposition(1),boxposition(2),60,q);
       if(isPos)
@@ -56,14 +57,13 @@ target="";
             disp(distanceError)
             disp(closestbox)
             lynx.command(qnew);
+            %lynx.set_pos(qnew);
             close=ToleranceMovement(lynx,color,qnew,0.3,2,1);
       end
 
       catch
       end
-  end
-                      
-           
+  end                 
 
 end
 
