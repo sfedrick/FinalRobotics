@@ -1,4 +1,4 @@
-function [breakme] = ToleranceMovement(lynx,color,desiredpos,error,timelimit,scooping)
+function [breakme] = ToleranceMovement(lynx,color,desiredpos,error,timelimit)
         reached_target = false;
         i=0;
         
@@ -27,14 +27,14 @@ function [breakme] = ToleranceMovement(lynx,color,desiredpos,error,timelimit,sco
             % End of student code
             
             [lucky,luckyboxes] = InUrFace(lynx,color,20,0.9,3,0,1);
-            if(lucky && scooping)
+            if(lucky)
                 breakme=true;
                 break;
             end
         end
-        if(time>timelimit && ~scooping)
-            breakme=true;
-        end
+   if(time>timelimit)
+
+   end
 end
 %the one below is the time version it doesn't work yet
 

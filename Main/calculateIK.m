@@ -49,23 +49,23 @@ oc=[o(1,:)-(d5*T0e(1,3));
 
 oc_o1 = oc - [0;0;d1];
 if norm(oc_o1,2) > a2 + a3
-    q = [];fprintf('\n');disp('Point is outside reachable workspace');
-    isPos = 0; disp('isPos = False');
+    q = [];fprintf('\n');
+    isPos = 0; 
     return 
 end
 
 %determine the feasibility of orientation
 %Note that theta1 is fixed by the position, only theta4 and theta5 dedicate to the end pose orientation.
 fprintf('\n');
-disp('---checking feasibility:---');
+% disp('---checking feasibility:---');
 
 isPos = checkfeasibility(T0e);          %defined in line 200-218
 
 
-if ~isPos
-    disp('-- After correction --')
-    T0e = corrected(T0e);               %defined in line 219-254
-end
+% if ~isPos
+%     disp('-- After correction --')
+%     T0e = corrected(T0e);               %defined in line 219-254
+% end
 % update oc o
 o = T0e(1:3,4);
 oc=[o(1,:)-(d5*T0e(1,3));
@@ -227,8 +227,8 @@ endaxis_z = T(1:3,3);
     R_corr = ax_an_R(axis,angle);                  %defined in line 247-254
     R_end = R_corr*T(1:3,1:3);
     T2 = [R_end o;0 0 0 1]; 
-    disp('T correct is');
-    disp(T2);
+%     disp('T correct is');
+%     disp(T2);
 end
 % theta1 = atan2(o(2),o(1));
 % y0_theta = [-sin(theta1);cos(theta1);0];
