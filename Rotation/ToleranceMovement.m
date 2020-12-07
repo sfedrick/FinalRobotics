@@ -1,4 +1,9 @@
+<<<<<<< HEAD
+%
+function [breakme] = ToleranceMovement(lynx,desiredpos,error,base)
+=======
 function [breakme] = ToleranceMovement(lynx,color,desiredpos,error,timelimit,scooping)
+>>>>>>> 7a881bd25aec58985899ed8378c6b9ab3c80731c
         reached_target = false;
         i=0;
         
@@ -36,24 +41,26 @@ function [breakme] = ToleranceMovement(lynx,color,desiredpos,error,timelimit,sco
             breakme=true;
         end
 end
-%the one below is the time version it doesn't work yet
-
-% function [breakme] = ToleranceMovement(lynx,desiredpos,error,base)
+%ros time sucks
+%function [breakme,dt] = ToleranceMovement(lynx,desiredpos,error,base)
 %         reached_target = false;
 %         breakme=false;
-%         OGtime=rostime("now");
-%         nowtime=rostime("now");
-%         time=OGtime.Nsec-nowtime.Nsec;
-%         timelimit=1*10^9;
+%         OGtime=RossyTime();
+%         nowtime=RossyTime();
+%         time=nowtime-OGtime;
+%         
+%         dt=0.01;
+%         posDiff=inf;
 %         
 %         while ~reached_target
-%             if(abs(time)>timelimit || time<0)
+%             timelimit=posDiff*10;
+%             if(time>timelimit)
 %                 breakme=true;
 %                 break;
 %             end
 %             % Check if robot is collided then wait
-%             nowtime=rostime("now");
-%             time=OGtime.Nsec-nowtime.Nsec;
+%             nowtime=RossyTime();
+%             time=nowtime-OGtime;
 %             
 %             %collision = collision | lynx.is_collided();
 %             % Add Student code here to decide if controller should send next
@@ -62,15 +69,19 @@ end
 %             % move to the next target.
 %             [pos, vel] = lynx.get_state();
 %             %disp(clc"position difference")
-%             
-%             posDiff=norm(pos(1:5)-desiredpos(1:5));
-%             if(posDiff<(error))
-%                % reached_target = true;
-%                disp("i broke out");
+%             if(isempty(pos))
+%                 dt=dt+0.01;
+%             else
+%                 posDiff=norm(pos(1:5)-desiredpos(1:5));
 %             end
-%             rosPause(0.01);
+%             
+%             if(posDiff<(error))
+%                reached_target = true;
+%                
+%             end
+%             rosPause(dt);
 %             % End of student code
 %         end
 %    
 % end
-% 
+

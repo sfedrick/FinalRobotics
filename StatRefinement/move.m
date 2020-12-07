@@ -8,12 +8,12 @@ function move(qfinal, lynx)
     while (reach == 0)
         [q, ~] = lynx.get_state();
         %pause(0.05)
-        lynx.command(qfinal)
-        count=count+1;                                      %useful when robot gets stuck in gazebo
+        lynx.command(qfinal);
+        count=count+1;                              %useful when robot gets stuck in gazebo
         if count>30
             break;
         end
-        disp("reaching")
+        disp("reaching"); 
 %       reachNorm = norm(q(1:5)-qfinal(1:5));
         reachNorm = norm(q - qfinal);                       %compares present state vs desired state of robot
         if reachNorm < 0.1                                  %if L2 norm distance error <0.1 ; reach = 1;

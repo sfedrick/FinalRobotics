@@ -43,7 +43,7 @@ for i=1:length(v)
     configs(i+1,:)=q;
     if(plot)
         [jointPos,T] = calculateFK(q);
-
+        
         % Use FKV to get the corresponding linear velocities up until jointDesired
         [pv,pq] = fkeval(qd,q,dt);
 
