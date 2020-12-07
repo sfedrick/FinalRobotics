@@ -28,7 +28,7 @@ function [Tout, Flag] =  PickedPose(T, pose, base, h)
     minDist = dist(index(2)); 
     blockVec = T(1:3,4)-pose{index(2)}(1:3,4);
     blockVec = blockVec / norm(blockVec);
-    distol = 40; % mm 
+    distol = 35; % mm 
     if minDist < distol
         % In this case, we avoid x axis align with the line between blocks.
         % find closest vec direction to blockVec, which is bad direction.

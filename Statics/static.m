@@ -59,105 +59,128 @@ function [] = static(color)
     poses = getpose(static.name, poselist, namelist);
     base = inv(Trg) * [0;0;0;1] ;
     base = base(1:3);
-    [T_pick_g, Flag] = PickedPose(poses{i}, poses, base, h); %desired picked pose in ground frame
+    
+%%%% Move above block %%%%   
 
-    T_pick_r = Trg * T_pick_g  ;           %desired picked pose in robot frame                
-%     if Flag == 0 
-%         [T_pick_r, change] = WhiteSideUp(T_pick_r, (Trg * static.pose{i}));
-%     end
+    [T_pick_g, Flag] = PickedPose(poses{i}, poses, base, h);                % Picked pose helps in picking block where its sides are square to the fingers of the gripper
+                                                                            % Flag is used to mark that the block is too close to another block - so not to orient white side up
+    T_pick_r = Trg * T_pick_g;                                              % desired picked pose in robot frame                
+    q1prior = calculateIK(T_pick_r);                                        % q1prior is used if there is nor solution for WhiteSideup()
+    T_pick_prior = T_pick_r;
+    if Flag == 0 
+         [T_pick_r, change] = WhiteSideUp(T_pick_r, (Trg * static.pose{i}));
+     else
+         change = 0;
+     end
     
     q1 = calculateIK(T_pick_r);
     if isempty(q1)
-        T_pick_g = Trg * static.pose{i};
-        T_pick_r = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)+50; 0, 0, 0, 1];
-        q1 = calculateIK(T_pick_r);
-        q1 = [ q1(1:4), -pi/2];
-        disp("basic pose")
-
+        q1 = q1prior;                                                       % if no soln for whiteSideUp(), then use q1 prior to pick up sqaured to sides
+        if isempty(q1)                                                      % If no soln for q1Prior, then pick it up in whatever way possible
+            T_pick_g = Trg * static.pose{i};
+            T_pick_r = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)+50; 0, 0, 0, 1];
+            q1 = calculateIK(T_pick_r);
+            q1 = [ q1(1:4), -pi/2];
+            disp("basic pose")
+        end
     end
     q1 = [q1, 20];
    
     move(q1, lynx)
-
     
-    T_down_g = T_pick_g - [zeros(3), [0;0;35];0 0 0 0];
-    T_down_r = Trg * T_down_g  ;           %desired picked pose in robot frame                
+%%%% Move down to block position %%%%
+
+    T_down_r = T_pick_r - [zeros(3), [0;0;35];0 0 0 0];                     % desired picked pose in robot frame                
     qdown = calculateIK(T_down_r);
-    
-    if isempty(qdown)
-        T_pick_g = Trg * static.pose{i};
-        T_pick_r2 = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)-5; 0, 0, 0, 1];
-        qdown = calculateIK(T_pick_r2);
-        qdown = [qdown(1:3), -0.4, -pi/2];
-
+    placeFlag = 0;                                                          % used to mark an infeasible pick
+    if isempty(qdown) | any(T_down_r(1:3, 3) ~= [0; 0;-1])                  % also check whether horizontal pick or vertical pick
+        T_down_r1 = T_pick_prior - [zeros(3), [0;0;35];0 0 0 0];            % we prefer vertical pick as that will help
+        qdown = calculateIK(T_down_r1);                                     % us to align white side up during placement
+        if isempty(qdown) | any(T_down_r1(1:3,3) ~= [0;0;-1])
+            T_down_g = static.pose{i} + [zeros(3), [0;0;20];0 0 0 0];       % Preferable pick position is
+            T_down_rr = Trg * T_down_g;                                     % WhiteSide up position / Vertical gripper
+            qdown = calculateIK(T_down_rr);                                 % then, block face squared with gripper / Vertical
+            if isempty(qdown)                                               % last resort is horizontal gripper / cannot align whiteSide up
+                T_pick_g = Trg * static.pose{i};
+                T_pick_r2 = [0, 0, 1, T_pick_g(1,4)-5; 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)-5; 0, 0, 0, 1];
+                qdown = calculateIK(T_pick_r2);
+                qdown = [qdown(1:3), -0.4, -pi/2];
+                placeFlag = 1; %used to alter place in case of infeasible picks
+            end
+        end
     end
     qdown = [qdown, 20];
     
     move(qdown, lynx)
     
-    %grab the object
-    qGrab = [qdown(1:5), -15];
+%%%% Grab the block %%%%
 
-    
+    qGrab = [qdown(1:5), -15];
     lynx.command(qGrab);
     grab = 0;
     pause(.5)   
 
-    qpick = [q1(1:5), -15];
-    
+%%%% Pick the block up after grabbing %%%%    
 
-%       NOte that:      pickNorm = norm(q(1:5)-qPick(1:5))
+    qpick = [q1(1:5), -15];
     move(qpick, lynx)
     
-    %stacks of more than 2 are risky as any slight movement by robot
-    %will make them fall. Hence, made 2 different positions for
-    %two stacks of 2 static blocks
-%     if i<3
-%         Tplace = goal_trans + [ zeros(1,3), -15; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
-%     else
-%         Tplace = goal_trans + [ zeros(1,3), +10; zeros(1,4); 0, 0, 0, 60; zeros(1,4)];
-%     end
-    Tplace = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 140; 0, 0, 0, 1];
+%%%% Move above the goal position %%%%
+
+    if change == 0
+        Tplace = [0, -1, 0, 72; -1, 0, 0, -275; 0, 0, -1, 140; 0, 0, 0, 1];
+    else
+        Tplace = [1, 0, 0, 69; 0, 0, -1, -270; 0, 1, 0, 140; 0, 0, 0, 1];
+    end
+
     [qPlace, ~] = calculateIK(Tplace);
-    qPlace = [qPlace, -15];
     
+% % This part reduces chances of slip as total rotn is divided in 2 parts % % 
+    if change == 2
+       qRotate = [qpick(1:4), qPlace(5), -15];
+       move(qRotate, lynx)
+       qPlace(5) = 1.5;
+    end
+    
+    
+    qPlace = [qPlace, -15];
     move(qPlace, lynx)
     
-    % move down to place the block
-%     Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, h -20; zeros(1,4)];
-%     if i<3
-%         Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, (60 - i*20); zeros(1,4)];
-%     else
-%         Tdown2 = Tplace - [ zeros(2,4); 0, 0, 0, (50 - (i-2)*20) ;zeros(1,4)];
-%     end
-    Tdown2 = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 30 + i*20 ; 0, 0, 0, 1];
+%%%% move down to place the block %%%%
+
+    if change == 0
+       Tdown2 = [0, -1, 0, 72; -1, 0, 0, -275; 0, 0, -1, (30 + (i*21)); 0, 0, 0, 1]; 
+    else 
+       Tdown2 = [1, 0, 0, 69; 0, 0, -1, -270; 0, 1, 0, (30 + (i*21)); 0, 0, 0, 1];
+    end
+    if placeFlag == 1                                                       % placeFlag is used for infeasible-picks  
+       Tdown2(2,4) = -275;                                                  % box may or may not be squared with gripper
+    end                                                                     % hence, adjusting placement along y axis only
+    
     qdown2 = calculateIK(Tdown2);
     qdown2 = [qdown2, -15];
+    if change == 2
+        qdown2 = [qdown2(1:4), 1.5, -15];
+    end
     move(qdown2, lynx)
     qDrop = [qdown2(1:5), 30];
     move(qDrop, lynx)
     pause(0.5)
     
-    %move to qEnd. qEnd acts as an intermediate position so that
-    %the robot doesnot hit a block while moving to another block
-    %this is done by retracting the robot upwards towards qEnd
-%     qEnd = [-1.2, 0, 0.2, 0, qDrop(5:6)];
-    Tend = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 140 ; 0, 0, 0, 1];
+%%%% move to qEnd; after place complete %%%%
+  
+    Tend = Tdown2 + [zeros(2,4); 0, 0, 0,60; zeros(1,4)];                   % qEnd is at a safe height
+    Tend(3, 4) = 140;                                                       % safe hieght = 140mm through trial and error
     qEnd = calculateIK(Tend);
+
+    qEnd = calculateIK(Tend)
+    if abs(qEnd(5)) > 1.4                                                   % we donot want roll while moving up
+        qEnd(5) = qDrop(5);                                                 % as roll may topple the stacked blocks
+    end
     qEnd = [qEnd, 30];
     move(qEnd, lynx)
-    %lynx.set_vel([1,0,0,0,0,0]);
-%     Tend = Tdown2 + [zeros(2,4); 0, 0, 0, 30; zeros(1,4)];
-%     qEnd = calculateIK(Tend)
-%     if isempty(qEnd)
-%         qEnd = [-1.2, 0.2, -0.2, qPlace(4:5)]
-%     end
-     %lynx.command(qEnd);
-     
-     
+       
     disp(" Placed static object ");
 end   
 toc
- % %   get state of your opponent's robot
- %   [q,qd]  = lynx.get_opponent_state()
 end
