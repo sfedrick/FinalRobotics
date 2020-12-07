@@ -32,7 +32,7 @@ function [] = static(color)
     for i=1:a
         dist(i,1) = norm(pose{i}(1:2,4) - goal(1:2));
     end
-%     dist
+
     
     priority=zeros(4,1);j=1;i=1;
     while sum(find(priority == 0) > 0) 
@@ -45,7 +45,7 @@ function [] = static(color)
             i=i+1;
         end
     end
-%     priority
+
     
     for i=1:4
         static.name{i,1} = name{priority(i,:)};
@@ -75,7 +75,7 @@ function [] = static(color)
     placeFlag = 0;
     q1 = calculateIK(T_pick_r);
     if isempty(q1)
-        q1 = q1prior;    static.pose{i}                                                  % if no soln for whiteSideUp(), then use q1 prior to pick up sqaured to sides
+        q1 = q1prior;                                                       % if no soln for whiteSideUp(), then use q1 prior to pick up sqaured to sides
         if isempty(q1)                                                      % If no soln for q1Prior, then pick it up in whatever way possible
             T_pick_g = Trg * static.pose{i};
             T_pick_r = [0, 0, 1, T_pick_g(1,4)-5; 0, -1, 0, T_pick_g(2,4)+8; 1, 0, 0, T_pick_g(3,4)+50; 0, 0, 0, 1];
@@ -100,7 +100,7 @@ function [] = static(color)
             T_down_g = static.pose{i} + [zeros(3), [0;0;20];0 0 0 0];       % Preferable pick position is
             T_down_rr = Trg * T_down_g;                                     % WhiteSide up position / Vertical gripper
             qdown = calculateIK(T_down_rr);                                 % then, block face squared with gripper / Vertical
-            if isempty(qdown) | placeFlag == 1                                               % last resort is horizontal gripper / cannot align whiteSide up
+            if isempty(qdown) | placeFlag == 1                              % last resort is horizontal gripper / cannot align whiteSide up
                 T_pick_g = Trg * static.pose{i};
                 T_pick_r2 = [0, 0, 1, T_pick_g(1,4)-7; 0, -1, 0, T_pick_g(2,4)+10; 1, 0, 0, T_pick_g(3,4)-5; 0, 0, 0, 1];
                 qdown = calculateIK(T_pick_r2);
