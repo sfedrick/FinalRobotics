@@ -8,6 +8,7 @@ function [q,isPos] = findperfect(r,h)
 %moves the end effector of the robot towards the center of the rotating
 %table using inverse and forward position kinematics  only use for a config
 %close to your current config
+
    [jointPositions,T0i] = calculateFK([1.1000    0.1670    0.7030   -0.8680 -pi/2 30]);
     endpos=[200,200,T0i(3,4)];
     pos=[T0i(1,4),T0i(2,4),T0i(3,4)+h];

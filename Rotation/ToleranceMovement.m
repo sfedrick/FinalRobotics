@@ -1,12 +1,19 @@
+<<<<<<< HEAD
 %
 function [breakme] = ToleranceMovement(lynx,desiredpos,error,base)
+=======
+function [breakme] = ToleranceMovement(lynx,color,desiredpos,error,timelimit,scooping)
+>>>>>>> 7a881bd25aec58985899ed8378c6b9ab3c80731c
         reached_target = false;
         i=0;
         
         breakme=false;
-        while ~reached_target
+       t0=RossyTime();
+       time=0;
+        while (~reached_target && time<timelimit)
+            time=RossyTime()-t0; 
             i=i+1;
-            base=base-i;
+            
             % Check if robot is collided then wait
             
             %collision = collision | lynx.is_collided();
@@ -23,8 +30,16 @@ function [breakme] = ToleranceMovement(lynx,desiredpos,error,base)
             end
             pause(0.1)
             % End of student code
+            
+            [lucky,luckyboxes] = InUrFace(lynx,color,20,0.9,3,0,1);
+            if(lucky && scooping)
+                breakme=true;
+                break;
+            end
         end
-   
+        if(time>timelimit && ~scooping)
+            breakme=true;
+        end
 end
 %ros time sucks
 %function [breakme,dt] = ToleranceMovement(lynx,desiredpos,error,base)
