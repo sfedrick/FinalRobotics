@@ -13,7 +13,7 @@ function [] = pickRightSideBlocks(color)
 % that later
 
 global lynx;
-lynx = ArmController('blue');
+lynx = ArmController(color);
 pause(1);
 
 % Filter out the static blocks first
@@ -23,7 +23,7 @@ pause(1);
 [T0e, targetBlockName] = calculateStrikePosForTargetBlock(dynamicName, dynamicPose, color);
 
 % Grab the block
-[successfullyGrabbed] = grabBlock([0 1], targetBlockName, T0e, color);
+[successfullyGrabbed] = grabBlock(targetBlockName, T0e, color);
 
 if (successfullyGrabbed)
     lynx.set_pos([0 0 0 0 0 -15]);

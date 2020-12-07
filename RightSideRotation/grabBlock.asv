@@ -1,13 +1,21 @@
-function [successfullyGrabbed] = grabBlock(endEffStrikeLine, desiredBlockName, endEffStrikePose, color)
+function [successfullyGrabbed] = grabBlock(desiredBlockName, endEffStrikePose, color)
 %GRABBLOCK 
 % Given a desired rotating block, grab it
 
 global lynx;
 
+if (isnan(endEffStrikePose))
+    disp('No blocks in target area');
+    return;
+end
+
+% depending on color, set
+
+% calculate end effector strike config q from the strike pose T0e
 [endEffStrikeConfig isPos] = calculateIKs(endEffStrikePose);
 
 % first move to the end effector strike pose
-move([endEffStrikeConfig, 30], lynx);
+move([endEffStrikeConfig, 30],lynx);
 
 % this is the angle from the end effector's strike "line" that we want the
 % block to be at before we tell the end effector to go down and grab the
@@ -19,8 +27,8 @@ angleFromEndEff = Inf;
 [name, pose, twist] = lynx.get_object_state();
 desiredBlockIdx = getIndexOfBlockForName(name, desiredBlockName);
 
-% once here, wait until the block is 15 degrees from the robot
-while(angleFromEndEff > 15)
+% once here, wait until the block is 30 degrees from the robot
+while(angleFromEndEff > 30)
     
     % keep polling the block's position
     [name, pose, twist] = lynx.get_object_state();
@@ -29,15 +37,34 @@ while(angleFromEndEff > 15)
     desiredBlockXYCoord = pose{desiredBlockIdx}(1:2,4);
     
     % get current angle between desired block and end effector strike line
-    angleFromEndEff = calcSmallerAngleBwTwoVectors(desiredBlockXYCoord,endEffStrikeLine);
-    pause(0.1);
+    angleFromEndEff = calcSmallerAngleBwTwoVectors(endEffStrikeLine,desiredBlockXYCoord)
+    pause(0.2);
 end
 
-% once block is 15 degrees from robot, then move down by 20 in height
+% once block is 30 degrees from robot, then move down by 20 in height
 endEffStrikePose(3,4) = endEffStrikePose(3,4) - 20;
 
-% get the new lowered config
-[endEffLoweredConfig isPos] = c
+% calculate the new lowered config q
+[endEffLoweredConfig isPos] = calculateIKs(endEffStrikePose)
+
+disp(endEffLoweredConfig);
+
+% move to the lowered config
+lynx.set_pos([endEffLoweredConfig, 30]);
+disp('lowering');
+pause(1);
+
+% grip the block
+lynx.set_pos([endEffLoweredConfig, -15]);
+disp('closing');
+
+% check to see if we successfully grabbed the block
+[pos, vel] = lynx.get_state();
+if (pos(6) > 0)
+    successfullyGrabbed = true;
+else
+    successfullyGrabbed = false;
+end
 
 end
 

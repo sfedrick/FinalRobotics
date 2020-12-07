@@ -1,9 +1,22 @@
-function [successfullyGrabbed] = grabBlock(endEffStrikeLine, desiredBlockName, endEffStrikePose, color)
+function [successfullyGrabbed] = grabBlock(desiredBlockName, endEffStrikePose, color)
 %GRABBLOCK 
 % Given a desired rotating block, grab it
 
 global lynx;
 
+if (isnan(endEffStrikePose))
+    disp('No blocks in target area');
+    return;
+end
+
+% depending on color, set end effector strike line
+if (strcmp('blue',color))
+    endEffStrikeLine = [0 1];
+else
+    endEffStrikeLine = [0 -1];
+end
+
+% calculate end effector strike config q from the strike pose T0e
 [endEffStrikeConfig isPos] = calculateIKs(endEffStrikePose);
 
 % first move to the end effector strike pose
@@ -37,7 +50,7 @@ end
 endEffStrikePose(3,4) = endEffStrikePose(3,4) - 20;
 
 % calculate the new lowered config q
-[endEffLoweredConfig isPos] = calculateIKs(endEffStrikePose);
+[endEffLoweredConfig isPos] = calculateIKs(endEffStrikePose)
 
 disp(endEffLoweredConfig);
 
