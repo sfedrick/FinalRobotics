@@ -3,7 +3,7 @@ function final(color)
     lynx = ArmController(color);
 
     pause(1);
-q=[ 0  0  0    0   0  30];
+q=[ 0  0  0    0   0  0];
 %q=findperfect(-20,15);
 %velq=[-1, 0,-1,0,0,0];
 %q=[0.759188047744899,0.160342666253201,0.630932408401299,-0.791275074654501,-1.570796326794897,30];
@@ -15,14 +15,15 @@ q=[ 0  0  0    0   0  30];
 
  
  %lynx.set_vel([0,-10,-10,0,0,0]);
- JerkMove(lynx,color,q,0.2,5,0.1,10);
+ %JerkMove(lynx,color,q,0.2,5,0.1,10);
 
 [q,qd]  = lynx.get_state();
+q2= [-1.3191    0.7934   -0.9508    1.7282    0.2517
+];
 
+ lynx.command(q2); 
 
- lynx.command(q); 
-
-[q,qd]  = lynx.get_state()
+%[q,qd]  = lynx.get_state()
 % % %   get state of your opponent's robot 
 %[q,qd]  = lynx.get_opponent_state()
 

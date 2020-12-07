@@ -72,27 +72,27 @@ function [] = static(color)
      else
          change = 0;
      end
-    
+    placeFlag = 0;
     q1 = calculateIK(T_pick_r);
     if isempty(q1)
-        q1 = q1prior;                                                       % if no soln for whiteSideUp(), then use q1 prior to pick up sqaured to sides
+        q1 = q1prior;    static.pose{i}                                                  % if no soln for whiteSideUp(), then use q1 prior to pick up sqaured to sides
         if isempty(q1)                                                      % If no soln for q1Prior, then pick it up in whatever way possible
             T_pick_g = Trg * static.pose{i};
-            T_pick_r = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)+50; 0, 0, 0, 1];
-            q1 = calculateIK(T_pick_r);
+            T_pick_r = [0, 0, 1, T_pick_g(1,4)-5; 0, -1, 0, T_pick_g(2,4)+8; 1, 0, 0, T_pick_g(3,4)+50; 0, 0, 0, 1];
+            q1 = calculateIK(T_pick_r); placeFlag = 1;
+            if (abs(q1(5)) < 1.4)
             q1 = [ q1(1:4), -pi/2];
-            disp("basic pose")
+            end
         end
     end
     q1 = [q1, 20];
    
-    move(q1, lynx)
-    
+    move(q1, lynx); 
 %%%% Move down to block position %%%%
 
     T_down_r = T_pick_r - [zeros(3), [0;0;35];0 0 0 0];                     % desired picked pose in robot frame                
     qdown = calculateIK(T_down_r);
-    placeFlag = 0;                                                          % used to mark an infeasible pick
+   % placeFlag = 0;                                                          % used to mark an infeasible pick
     if isempty(qdown) | any(T_down_r(1:3, 3) ~= [0; 0;-1])                  % also check whether horizontal pick or vertical pick
         T_down_r1 = T_pick_prior - [zeros(3), [0;0;35];0 0 0 0];            % we prefer vertical pick as that will help
         qdown = calculateIK(T_down_r1);                                     % us to align white side up during placement
@@ -100,9 +100,9 @@ function [] = static(color)
             T_down_g = static.pose{i} + [zeros(3), [0;0;20];0 0 0 0];       % Preferable pick position is
             T_down_rr = Trg * T_down_g;                                     % WhiteSide up position / Vertical gripper
             qdown = calculateIK(T_down_rr);                                 % then, block face squared with gripper / Vertical
-            if isempty(qdown)                                               % last resort is horizontal gripper / cannot align whiteSide up
+            if isempty(qdown) | placeFlag == 1                                               % last resort is horizontal gripper / cannot align whiteSide up
                 T_pick_g = Trg * static.pose{i};
-                T_pick_r2 = [0, 0, 1, T_pick_g(1,4)-5; 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)-5; 0, 0, 0, 1];
+                T_pick_r2 = [0, 0, 1, T_pick_g(1,4)-7; 0, -1, 0, T_pick_g(2,4)+10; 1, 0, 0, T_pick_g(3,4)-5; 0, 0, 0, 1];
                 qdown = calculateIK(T_pick_r2);
                 qdown = [qdown(1:3), -0.4, -pi/2];
                 placeFlag = 1; %used to alter place in case of infeasible picks
@@ -110,14 +110,15 @@ function [] = static(color)
         end
     end
     qdown = [qdown, 20];
-    
+    if placeFlag == 1
+        qdown(6) = 30;
+    end
     move(qdown, lynx)
     
 %%%% Grab the block %%%%
 
     qGrab = [qdown(1:5), -15];
     lynx.command(qGrab);
-    grab = 0;
     pause(.5)   
 
 %%%% Pick the block up after grabbing %%%%    
@@ -130,7 +131,7 @@ function [] = static(color)
     if change == 0
         Tplace = [0, -1, 0, 72; -1, 0, 0, -275; 0, 0, -1, 140; 0, 0, 0, 1];
     else
-        Tplace = [1, 0, 0, 69; 0, 0, -1, -270; 0, 1, 0, 140; 0, 0, 0, 1];
+        Tplace = [1, 0, 0, 53; 0, 0, -1, -270; 0, 1, 0, 140; 0, 0, 0, 1];
     end
 
     [qPlace, ~] = calculateIK(Tplace);
@@ -151,7 +152,7 @@ function [] = static(color)
     if change == 0
        Tdown2 = [0, -1, 0, 72; -1, 0, 0, -275; 0, 0, -1, (30 + (i*21)); 0, 0, 0, 1]; 
     else 
-       Tdown2 = [1, 0, 0, 69; 0, 0, -1, -270; 0, 1, 0, (30 + (i*21)); 0, 0, 0, 1];
+       Tdown2 = [1, 0, 0, 53; 0, 0, -1, -270; 0, 1, 0, (30 + (i*21)); 0, 0, 0, 1];
     end
     if placeFlag == 1                                                       % placeFlag is used for infeasible-picks  
        Tdown2(2,4) = -275;                                                  % box may or may not be squared with gripper
@@ -169,11 +170,10 @@ function [] = static(color)
     
 %%%% move to qEnd; after place complete %%%%
   
-    Tend = Tdown2 + [zeros(2,4); 0, 0, 0,60; zeros(1,4)];                   % qEnd is at a safe height
+    Tend = Tdown2;                                                          % qEnd is at a safe height
     Tend(3, 4) = 140;                                                       % safe hieght = 140mm through trial and error
     qEnd = calculateIK(Tend);
-
-    qEnd = calculateIK(Tend)
+    
     if abs(qEnd(5)) > 1.4                                                   % we donot want roll while moving up
         qEnd(5) = qDrop(5);                                                 % as roll may topple the stacked blocks
     end
