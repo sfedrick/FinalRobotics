@@ -28,7 +28,7 @@ close=false;
     qold=q;
 L=length(jointvel(:,1));
 range=100;
-direction=0.9;
+direction=0.88;
 if(~blockingpath)
        for target_index = 1:L
 
@@ -88,11 +88,10 @@ if(~blockingpath)
        wait=WithInFace;
        counter=0;
        
-       movebuffer=10;
-       ramp=0.1;
+       movebuffer=5;
+       ramp=1;
        firsttime=true;
        [close,distancevec,originaltarget]=grip(lynx,color,BoxesInUrFace,100);
-       range=norm(distancevec);
        while(~close &&  wait)
            counter=counter+1;
     %        if(mod(counter,50)==0)
@@ -104,7 +103,8 @@ if(~blockingpath)
     %            end
     %        end
 
-            range=range-ramp*counter;
+           range=range-ramp*counter;
+            
             direction=direction-0.01*ramp*counter;
            [q,~]=lynx.get_state();
          [~,RoboPose] = calculateFK(q);
@@ -118,9 +118,8 @@ if(~blockingpath)
 
            [WithInFace,BoxesInUrFace] = InUrFace(lynx,color,range,direction,3,0,1);
            [velocityFace,velFaces] = InUrFace(lynx,color,range,direction,3,1,1);
-          [close,distancevec,newtarget]=grip(lynx,color,BoxesInUrFace,range-movebuffer);
-          %range=norm(distancevec); figure out how to implement this 
-          if(range<30)
+          [close,distancevec,newtarget]=grip(lynx,color,BoxesInUrFace,range);
+           if(range<25)
               disp("counter broke me out")
               disp(range)
               disp(direction)
@@ -142,22 +141,20 @@ if(~blockingpath)
            elseif(WithInFace && ~strcmp(originaltarget,newtarget) && velocityFace)
              [close,distancevec,originaltarget]=grip(lynx,color,velFaces,range);
            elseif(WithInFace && ~strcmp(originaltarget,newtarget))
-               [close,distancevec,originaltarget]=grip(lynx,color,BoxesInUrFace,range-movebuffer);
+               [close,distancevec,originaltarget]=grip(lynx,color,BoxesInUrFace,range);
            else
                wait=false;
           end
 
-         rosPause(0.1);
+         rosPause(0.2);
        end
 
-        [ender,dq]= lynx.get_state();
-        dender(6)=-5;
+        [ender,~]= lynx.get_state();
         ender(6)=-5;
+        lynx.set_vel([0,0,0,0,0,-5]);
         if(close)
-            
             lynx.set_pos(ender);
-            lynx.set_vel(dender);
-            rosPause(0.5);
+            rosPause(1);
            disp("result");
          
         end
