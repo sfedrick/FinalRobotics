@@ -52,7 +52,7 @@ function [] = static(color)
         static.pose{i,1} = pose{priority(i,:)};
     end
 
- for i=1:4
+ for i=1:1
 
     % update the position of the block in every loop.
     [namelist,poselist,~] = lynx.get_object_state();
@@ -61,35 +61,50 @@ function [] = static(color)
     base = base(1:3);
     [T_pick_g, Flag] = PickedPose(poses{i}, poses, base, h); %desired picked pose in ground frame
 
-    T_pick_r = Trg * T_pick_g  ;           %desired picked pose in robot frame                
+    T_pick_r = Trg * T_pick_g;           %desired picked pose in robot frame                
+    q1prior = calculateIK(T_pick_r);
+    T_pick_prior = T_pick_r;
     if Flag == 0 
-        [T_pick_r, change] = WhiteSideUp(T_pick_r, (Trg * static.pose{i}));
-    end
+         [T_pick_r, change] = WhiteSideUp(T_pick_r, (Trg * static.pose{i}));
+     else
+         change = 0;
+     end
     
     q1 = calculateIK(T_pick_r);
     if isempty(q1)
-        T_pick_g = Trg * static.pose{i};
-        T_pick_r = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)+50; 0, 0, 0, 1];
-        q1 = calculateIK(T_pick_r);
-        q1 = [ q1(1:4), -pi/2];
-        disp("basic pose")
-
+        q1 = q1prior;
+        if isempty(q1)
+            T_pick_g = Trg * static.pose{i};
+            T_pick_r = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)+50; 0, 0, 0, 1];
+            q1 = calculateIK(T_pick_r);
+            q1 = [ q1(1:4), -pi/2];
+            disp("basic pose")
+        end
     end
     q1 = [q1, 20];
    
     move(q1, lynx)
 
     
-%%%%    T_down_g = T_pick_g - [zeros(3), [0;0;35];0 0 0 0];
-    T_down_r = T_pick_r - [zeros(3), [0;0;35];0 0 0 0] ;           %desired picked pose in robot frame                
+%     T_down_g = T_pick_g - [zeros(3), [0;0;35];0 0 0 0];
+%     T_down_rr = Trg * T_down_g;
+    T_down_r = T_pick_r - [zeros(3), [0;0;35];0 0 0 0]           %desired picked pose in robot frame                
     qdown = calculateIK(T_down_r);
     
-    if isempty(qdown)
-        T_pick_g = Trg * static.pose{i};
-        T_pick_r2 = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)-5; 0, 0, 0, 1];
-        qdown = calculateIK(T_pick_r2);
-        qdown = [qdown(1:3), -0.4, -pi/2];
-
+    if isempty(qdown) | any(T_down_r(1:3, 3) ~= [0; 0;-1])
+        T_down_r1 = T_pick_prior - [zeros(3), [0;0;35];0 0 0 0];
+        qdown = calculateIK(T_down_r1);
+        if isempty(qdown) | any(T_down_r1(1:3,3) ~= [0;0;-1])
+            T_down_g = static.pose{i} + [zeros(3), [0;0;20];0 0 0 0];
+            T_down_rr = Trg * T_down_g;
+            qdown = calculateIK(T_down_rr);
+            if isempty(qdown)
+                T_pick_g = Trg * static.pose{i};
+                T_pick_r2 = [0, 0, 1, T_pick_g(1,4); 0, -1, 0, T_pick_g(2,4); 1, 0, 0, T_pick_g(3,4)-5; 0, 0, 0, 1];
+                qdown = calculateIK(T_pick_r2);
+             qdown = [qdown(1:3), -0.4, -pi/2];
+            end
+        end
     end
     qdown = [qdown, 20];
     
@@ -109,7 +124,7 @@ function [] = static(color)
 %       NOte that:      pickNorm = norm(q(1:5)-qPick(1:5))
     move(qpick, lynx)
     
-        
+       
     if change == 0
         Tplace = [0, -1, 0, 72; -1, 0, 0, -275; 0, 0, -1, 140; 0, 0, 0, 1];
     else 
@@ -143,9 +158,12 @@ function [] = static(color)
     %move to qEnd. qEnd acts as an intermediate position so that
     %the robot doesnot hit a block while moving to another block
   
-    Tend = Tdown2 + [zeros(2,4); 0, 0, 0, 60; zeros(1,4)];
+    Tend = Tdown2 + [zeros(2,4); 0, 0, 0,60; zeros(1,4)];
     %Tend = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 140 ; 0, 0, 0, 1];
     qEnd = calculateIK(Tend);
+    if abs(qEnd(5)) > 1.4
+        qEnd(5) = qDrop(5);
+    end
     qEnd = [qEnd, 30];
     move(qEnd, lynx)
      
