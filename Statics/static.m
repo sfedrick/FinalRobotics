@@ -52,7 +52,7 @@ function [] = static(color)
         static.pose{i,1} = pose{priority(i,:)};
     end
 
- for i=3:3
+ for i=1:4
 
     % update the position of the block in every loop.
     [namelist,poselist,~] = lynx.get_object_state();
@@ -109,36 +109,32 @@ function [] = static(color)
 %       NOte that:      pickNorm = norm(q(1:5)-qPick(1:5))
     move(qpick, lynx)
     
-    %stacks of more than 2 are risky as any slight movement by robot
-    %will make them fall. Hence, made 2 different positions for
-    %two stacks of 2 static blocks
-    
+        
     if change == 0
-        Tplace = [0, -1, 0, 70; -1, 0, 0, -270; 0, 0, -1, 140; 0, 0, 0, 1];
-    elseif change == 1
-        Tplace = [1, 0, 0, 70; 0, 0, -1, -270; 0, 1, 0, 140; 0, 0, 0, 1];
-    else
-        %Tplace = [ -1, 0, 0, 70; 0, 0, -1, -270; 0, -1, 0, 140; 0, 0, 0, 1];
-        Tplace = [0, -0.9680, 0.2510, 70; 0, -0.2510, -0.9680, -270; 1, 0, 0, 140; 0, 0, 0, 1];
-    end
+        Tplace = [0, -1, 0, 72; -1, 0, 0, -275; 0, 0, -1, 140; 0, 0, 0, 1];
+    else 
+        Tplace = [1, 0, 0, 69; 0, 0, -1, -270; 0, 1, 0, 140; 0, 0, 0, 1];
+   end
     [qPlace, ~] = calculateIK(Tplace);
     qPlace = [qPlace, -15];
-    
+    if change == 2
+        qPlace = [qPlace(1:4), 1.5, -15];
+    end
     move(qPlace, lynx)
     
     % move down to place the block
 
     if change == 0
-       Tdown2 = [0, -1, 0, 75; -1, 0, 0, -270; 0, 0, -1, 30 + i*20 ; 0, 0, 0, 1]; 
-    elseif change == 1
-        Tdown2 = [1, 0, 0, 70; 0, 0, -1, -270; 0, 1, 0, (30 + (i*20)); 0, 0, 0, 1];
-    else
-        %Tdown2 = [ 1, 0, 0, 70; 0, 0, -1, -270; 0, 1, 0, (30 + (i*20)); 0, 0, 0, 1] * [ cos(1.5), -sin(1.5), 0, 0; sin(1.5), cos(1.5), 0, 0; 0, 0, 0, 1; 0, 0, 0, 1];
-        Tdown2 = [0, -1, 0, 75; -1, 0, 0, -270; 0, 0, -1, 30 + i*20 ; 0, 0, 0, 1] * [ cos(1.5), -sin(1.5), 0, 0; sin(1.5), cos(1.5), 0, 0; 0, 0, 0, 1; 0, 0, 0, 1];
+       Tdown2 = [0, -1, 0, 72; -1, 0, 0, -275; 0, 0, -1, 30 + i*20 ; 0, 0, 0, 1]; 
+    else 
+        Tdown2 = [1, 0, 0, 69; 0, 0, -1, -270; 0, 1, 0, (30 + (i*20)); 0, 0, 0, 1];
     end
     %
     qdown2 = calculateIK(Tdown2);
     qdown2 = [qdown2, -15];
+    if change == 2
+        qdown2 = [qdown2(1:4), 1.5, -15];
+    end
     move(qdown2, lynx)
     qDrop = [qdown2(1:5), 30];
     move(qDrop, lynx)
@@ -156,6 +152,5 @@ function [] = static(color)
      
     disp(" Placed static object ");
 end   
-
-
+toc
 end

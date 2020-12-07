@@ -11,6 +11,8 @@ function [Tout, change] = WhiteSideUp(Tin, pose)
 	% change is 0 if white side is already up
 	% change is 1; if face can be aligned in 1 step i.e. by picking in a different orientation / no extra steps reqd
 	% change is 2; if block needs to be picked and dropped - then picked up again in a different orientation - time consuming step
+    % in case of change is 2, this is quicker if we just rotate q5 manually
+    % to +1.5 in main static script
 
 	%%%%%%
 
@@ -58,8 +60,7 @@ function [Tout, change] = WhiteSideUp(Tin, pose)
     end
 	if product  < -0.8
 		change = 2;
-		%%%This is where the block would take TWO steps
-        %%% This will add a lot of time, we can just ignore this part
+		%%%Its quicker if we just rotate  q5 = +1.5; done in main script
         Tout = Tin;
 	end
 
