@@ -17,10 +17,8 @@ function [close] = rotationdriver(lynx,color,r)
     direction=0.8;
     leftrightRange=10;
     
-% [q, ~] = lynx.get_state();
-%  [q,~] = goDown(q,60);
-%  lynx.set_pos(q);
-%  ToleranceMovement(lynx,color,q,0.1,1,0)
+
+ ToleranceMovement(lynx,color,q,0.1,1,0)
  [start,~]=findperfect(r,-10) ; 
 lynx.set_pos(start);
 ToleranceMovement(lynx,color,start,0.1,3,0)
