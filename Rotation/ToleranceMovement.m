@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-%
-function [breakme] = ToleranceMovement(lynx,desiredpos,error,base)
-=======
+
 function [breakme] = ToleranceMovement(lynx,color,desiredpos,error,timelimit,scooping)
->>>>>>> 7a881bd25aec58985899ed8378c6b9ab3c80731c
         reached_target = false;
         i=0;
         

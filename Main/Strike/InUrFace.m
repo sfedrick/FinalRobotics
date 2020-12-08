@@ -28,7 +28,7 @@ if(ignorez)
 safety(3)=0;
 end
 EndLocation=EndLocation-safety*5;
-[name,pose,twist]=filterOutStaticBlocks(lynx);
+[name,pose,twist]=filterOutStaticBlocks();
 N=length(name);
 %transform from robot frame to base frame 
 if(strcmp(color,'red'))
