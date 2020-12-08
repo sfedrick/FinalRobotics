@@ -1,6 +1,10 @@
 function [] = static(color)
     tic
-    global lynx 
+    global lynx
+    lynx = ArmController(color);
+    % get state of your robot
+    
+    
 
     [q,qd]  = lynx.get_state();
  

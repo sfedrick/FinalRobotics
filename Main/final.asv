@@ -5,18 +5,14 @@ lynx = ArmController(color);
 pause(1);
 t0=RossyTime();
 time=0;
-timelimit=15;
+timelimit=20;
 LocalLimit=5;
 stillboxes=true;
-%wipe=false;
-if(strcmp(color,'blue'))
- axis=[1,0];   
-else
- axis=[-1,0];   
-end
-
-
-coordDynamic=[110,-270,120];
+wipe=false;
+if(
+axis=[-1,0];
+axis=[1,0];
+coordDynamic=[100,-270,120];
 while(stillboxes && time<timelimit)
        time=RossyTime()-t0;
         [dynamicName, dynamicPose, dynamicTwist]=filterOutStaticBlocks();
@@ -36,25 +32,18 @@ while(stillboxes && time<timelimit)
             else
                 stillboxes=true;
             end
-            Love=wesleyLovesMe(dynamicPose);
-          
+            
+            
+            
             localTime=RossyTime()-tl; 
             
             r = calculateRadiusForEndEff(lynx,color,axis,0.5);
-            r=inf;
             if(~isnan(r) && r<60)
                 safety=-15;
                 [start,~]=findperfect(safety,15);
                 JerkMove(lynx,color,start,0.3,1,0.1,5);
                 close = rotationdriver(lynx,color,r);
-%             elseif(Love)
-%                 try
-%                 pickRightSideBlocks(color);
-%                 catch
-%                     disp("wesley doesn't love me");
-%                 end
             else
-                
                 rosPause(1);
                 %do reverse rotation driver
             end
@@ -79,6 +68,5 @@ while(stillboxes && time<timelimit)
 end
 
 static(color)
-end
 
     

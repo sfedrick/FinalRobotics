@@ -16,9 +16,9 @@ function q = reachgoal(coord, color, lynx)
    end
     % transfer to ground frame.
     p = reshape(coord, [3,1]);
-    p = Trg * [p;1]; % transfer to robot frame.
+    p = [p;1]; % transfer to robot frame.
     T = [0, -1, 0, p(1); -1, 0, 0, p(2); 0, 0, -1, p(3); 0, 0, 0, 1];
-    q = calculateIK(T);
+    [q,~] = calculateIK(T);
     % note that this may not be able to get a solution within joint limits
     % sometime and the code runs into error. So be careful to input the
     % coordinate of the goal.
