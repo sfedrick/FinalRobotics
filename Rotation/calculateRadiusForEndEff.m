@@ -32,7 +32,7 @@ elseif(strcmp(color,'blue'))
        0,0,0,1]; 
 end
 
-[dynamicName, dynamicPose, dynamicTwist] = filterOutStaticBlocks(lynx);
+[dynamicName, dynamicPose, dynamicTwist] = filterOutStaticBlocks();
 
 for i=1:length(dynamicName)
     % get each block's x & y linear velocities in the world's frame

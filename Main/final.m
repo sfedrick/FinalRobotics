@@ -1,27 +1,61 @@
 function final(color)
-    global lynx % necessary to use ArmController inside a function
-    lynx = ArmController(color);
 
-    pause(1);
-q=[ 0  0  0    0   0  0];
-%q=findperfect(-20,15);
-%q=[-10, -10,-10,-10,-10,0];
-%q=[0.759188047744899,0.160342666253201,0.630932408401299,-0.791275074654501,-1.570796326794897,30];
-%q=[-0.6340    1.4000   -1.2550    1.5760   -0.4040   -0.4750]; 
-%q=[-0.7921    0.6797   -0.4542    1.3453    0.3648   20.0000];
-%lynx.set_pos(q); % used to set position to q
-%lynx.set_vel(velq);
-%lynx.set_vel([0 0 0 0 0 0]);
+global lynx;
+lynx = ArmController(color);
+pause(1);
+t0=RossyTime();
+time=0;
+timelimit=20;
+LocalLimit=10;
+stillboxes=true;
+wipe=false;
 
- 
- %lynx.set_vel([0,-10,-10,0,0,0]);
- %JerkMove(lynx,color,q,0.2,5,0.1,10);
+axis=[-1,0];
+axis=[1,0];
+coordDynamic=[110,-275,120];
+while(stillboxes && time<timelimit)
+       time=RossyTime()-t0;
+        [dynamicName, dynamicPose, dynamicTwist]=filterOutStaticBlocks();
+        if(isempty(dynamicName))
+            stillboxes=false;
+        else
+            stillboxes=true;
+        end
+        %localtime kicks you out of while loop if you're taking too long
+        tl=RossyTime();
+        localTime=0;
+        close=false;
+        while(~close && localTime<LocalLimit && stillboxes)
+            [dynamicName, dynamicPose, dynamicTwist] = filterOutStaticBlocks();
+            if(isempty(dynamicName))
+                stillboxes=false;
+            else
+                stillboxes=true;
+            end
+            
+            
+            
+            localTime=RossyTime()-tl; 
+            
+            r = calculateRadiusForEndEff(lynx,color,axis,0.5);
+            if(~isnan(r) && r<60)
+                close = rotationdriver(lynx,color,r);
+            else
+                rosPause(1);
+                %do reverse rotation driver
+            end
+            
+          
+        end
+        if(close)
+            %move block to goal table
+          lynx.set_vel([0,0,0,0,0,-100]);
+          q=[0,0,0,0,0,-5];
+          move(lynx,q);
+          q = reachgoal(coordDynamic, color, lynx);
+          move(lynx,q);
+        end
 
 
- lynx.command(q2); 
-
-%[q,qd]  = lynx.get_state()
-% % %   get state of your opponent's robot 
-%[q,qd]  = lynx.get_opponent_state()
 
 end
