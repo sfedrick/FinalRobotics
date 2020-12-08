@@ -36,7 +36,7 @@ function [] = static(color)
     
     priority=zeros(4,1);j=1;i=1;
     while sum(find(priority == 0) > 0) 
-        if ((dist(i,1) == min(dist(:,1))) & j < 5 & (sum(twist{i}) == 0))
+        if ((dist(i,1) == min(dist(:,1))) && j < 5 & (sum(twist{i}) == 0))
             priority(j,:)=i;
             j=j+1;
             dist(i,1) = 1000;

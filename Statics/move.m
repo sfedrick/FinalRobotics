@@ -13,7 +13,7 @@ function move(qfinal, lynx)
         if count>30
             break;
         end
-        disp("reaching"); 
+%         disp("reaching"); 
 %       reachNorm = norm(q(1:5)-qfinal(1:5));
         reachNorm = norm(q - qfinal);                       %compares present state vs desired state of robot
         if reachNorm < 0.1                                  %if L2 norm distance error <0.1 ; reach = 1;
@@ -23,6 +23,6 @@ function move(qfinal, lynx)
         end
     end
     
-    disp("reach complete");
+%     disp("reach complete");
     %pause(0.1)
 end

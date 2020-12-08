@@ -27,7 +27,7 @@ while(stillboxes && time<timelimit)
         tl=RossyTime();
         localTime=0;
         close=false;
-        while(~close && localTime<LocalLimit && stillboxes)
+        while(~close && localTime<LocalLimit && stillboxes &&(time+(LocalLimit/2)<timelimit))
             [dynamicName, dynamicPose, dynamicTwist] = filterOutStaticBlocks();
             if(isempty(dynamicName))
                 stillboxes=false;
