@@ -1,6 +1,11 @@
 function [] = static(color)
     tic
-    global lynx 
+    global lynx
+%     lynx = ArmController(color);
+%     % get state of your robot
+%     pause(2)
+    %lynx.wait_for_start()
+    
 
     [q,qd]  = lynx.get_state();
  
@@ -20,7 +25,7 @@ function [] = static(color)
        error('Sorry, wrong color name!')
    end
    h = 50;   
-    [name,pose,~] = lynx.get_object_state();
+    [name,pose,twist] = lynx.get_object_state();
     [a, ~]=size(name);
     
     dist = zeros(a,1);
@@ -31,7 +36,7 @@ function [] = static(color)
     
     priority=zeros(4,1);j=1;i=1;
     while sum(find(priority == 0) > 0) 
-        if ((dist(i,1) == min(dist(:,1))) && j < 5)
+        if ((dist(i,1) == min(dist(:,1))) & j < 5 & (sum(twist{i}) == 0))
             priority(j,:)=i;
             j=j+1;
             dist(i,1) = 1000;
@@ -113,8 +118,8 @@ function [] = static(color)
 %%%% Grab the block %%%%
 
     qGrab = [qdown(1:5), -15];
-    lynx.command(qGrab);
-    pause(.5)   
+    move(qGrab, lynx); %lynx.command(qGrab);
+    %pause(.5)   
 
 %%%% Pick the block up after grabbing %%%%    
 
@@ -150,7 +155,7 @@ function [] = static(color)
        Tdown2 = [1, 0, 0, 53; 0, 0, -1, -270; 0, 1, 0, (30 + (i*21)); 0, 0, 0, 1];
     end
     if placeFlag == 1                                                       % placeFlag is used for infeasible-picks  
-       Tdown2(2,4) = -275;                                                  % box may or may not be squared with gripper
+       Tdown2(2,4) = -273;                                                  % box may or may not be squared with gripper
     end                                                                     % hence, adjusting placement along y axis only
     
     qdown2 = calculateIK(Tdown2);
@@ -161,7 +166,7 @@ function [] = static(color)
     move(qdown2, lynx)
     qDrop = [qdown2(1:5), 30];
     move(qDrop, lynx)
-    pause(0.5)
+   % pause(0.5)
     
 %%%% move to qEnd; after place complete %%%%
   
