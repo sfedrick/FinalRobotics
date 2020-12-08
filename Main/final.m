@@ -82,3 +82,4 @@ static(color)
 end
 
     
+git c
