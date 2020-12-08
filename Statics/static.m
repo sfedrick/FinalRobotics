@@ -118,7 +118,7 @@ function [] = static(color)
 %%%% Grab the block %%%%
 
     qGrab = [qdown(1:5), -15];
-    move(qGrabm lynx); %lynx.command(qGrab);
+    move(qGrab, lynx); %lynx.command(qGrab);
     %pause(.5)   
 
 %%%% Pick the block up after grabbing %%%%    
